@@ -1,0 +1,15 @@
+{
+  "strict": "global",
+  "esversion": 9,
+  "browser": true,
+  "devel": true,
+  "loopfunc": true,
+  "globals": {
+    "app": true,
+    "Walk": true,
+    "Koch": true,
+    "Hilbert": true,
+    "Fourier": true,
+    "Buttons": true
+  }
+}
