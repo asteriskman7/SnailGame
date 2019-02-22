@@ -1,9 +1,10 @@
 'use strict';
 
 class Walk {
-  constructor(canvas, snailImage) {
+  constructor(canvas, parent, snailImage) {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d');
+    this.parent = parent;
 
     this.mousePressed = undefined;
     this.mousePos = undefined;
@@ -14,7 +15,7 @@ class Walk {
 
     this.snailImage = snailImage;
 
-    this.canvas.style.display = 'block';
+    this.canvas.style.display = 'inline';
     this.state = {};
     this.t = 0;
     this.state.coins = 0;
@@ -156,6 +157,9 @@ class Walk {
         this.xpos += v;
       }
     }
+  }
+  feed(val) {
+    this.state.coins += val;
   }
 }
 

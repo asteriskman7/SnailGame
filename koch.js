@@ -1,3 +1,78 @@
+'use strict';
+
+class Koch {
+  constructor(canvas, parent) {
+    this.canvas = canvas;
+    this.ctx = this.canvas.getContext('2d');
+    this.canvas.style.display = 'inline';
+    this.parent = parent;
+    this.state = {};
+    this.t = 0;
+    this.snailSpeed = 1;
+    this.setLevel(0);
+  }
+  getSaveString() {
+    return JSON.stringify(this.state);
+  }
+  loadFromString(str) {
+    const loadedState = JSON.parse(str);
+    //let anything from loadedState override current state
+    this.state = {...this.state,...loadedState};
+  }
+  draw(timestamp, deltaTime) {
+    const ctx = this.ctx;
+
+    ctx.save();
+
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    ctx.translate(this.canvas.width * 0.5, this.canvas.height * 0.5);
+
+    this.ctx.fillStyle = 'red';
+    this.ctx.font = '30 Courier';
+    this.ctx.fillText('Koch', 10, 10);
+
+
+    ctx.fillRect(100 * Math.cos(this.t), 100 * Math.sin(this.t), 10, 10);
+    ctx.restore();
+  }
+  update(timestamp, deltaTime) {
+    const prevT = this.t;
+    this.t += this.snailSpeed * deltaTime / 1000;
+    if (this.t % 6.8 < prevT % 6.8) {
+      this.parent.feed(10);
+    }
+  }
+  setLevel(n) {
+    let cmd = 'L--L--L'.split``;
+
+    let deltaAngle = Math.PI / 3;
+
+    let iterations = n;
+    let edgeCount;
+    for (let i = 0; i < iterations; i++) {
+      edgeCount = 0;
+      let newCmd = [];
+      cmd.forEach(v => {
+        switch (v) {
+          case 'L':
+            newCmd = newCmd.concat('L+L--L+L'.split``);
+            edgeCount += 4;
+            break;
+          case '-':
+          case '+':
+            newCmd.push(v);
+            break;
+        }
+      });
+      cmd = newCmd;
+    }
+    this.cmds = cmd;
+  }
+}
+
+if (false) {
+
 const canvas = document.getElementById('canvas_main');
 const ctx = canvas.getContext('2d');
 const w = canvas.width;
@@ -154,3 +229,5 @@ function draw() {
   window.requestAnimationFrame(draw);
 }
 draw();
+
+}

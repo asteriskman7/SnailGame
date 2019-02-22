@@ -5,6 +5,7 @@ body {
 canvas {
   background: black;
   display: none;
+  margin: 1em;
 }
 
 .imgHidden {

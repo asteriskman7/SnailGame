@@ -5,12 +5,12 @@ const app = {
   init: function() {
     console.log('init');
 
-    app.levelList = ['walk'];
+    app.levelList = ['walk', 'koch', 'hilbert', 'fourier'];
     app.levels = {};
-    app.levels.walk = new Walk(document.getElementById('cwalk'), document.getElementById('imgWalkingSnail'));
-    //app.levels.push(new Koch(document.getElementById('ckoch')));
-    //app.levels.push(new Hilbert(document.getElementById('chilbert')));
-    //app.levels.push(new Fourier(document.getElementById('cfourier')));
+    app.levels.walk = new Walk(document.getElementById('cwalk'), undefined, document.getElementById('imgWalkingSnail'));
+    app.levels.koch = new Koch(document.getElementById('ckoch'), app.levels.walk);
+    app.levels.hilbert = new Hilbert(document.getElementById('chilbert'), app.levels.koch);
+    app.levels.fourier = new Fourier(document.getElementById('cfourier'), app.levels.hilbert);
 
     app.load();
     app.tick();
