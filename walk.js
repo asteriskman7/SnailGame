@@ -1,10 +1,9 @@
 'use strict';
 
 class Walk {
-  constructor(canvas, parent, snailImage) {
+  constructor(canvas, snailImage) {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d');
-    this.parent = parent;
 
     this.mousePressed = undefined;
     this.mousePos = undefined;
@@ -37,6 +36,10 @@ class Walk {
     });
 
     this.buttons.add(canvas.width - 100, 0, 100, 30, 'hello', () => {console.log('button pressed');});
+  }
+  setRelations(parent, child) {
+    this.parent = parent;
+    this.child = child;
   }
   getSaveString() {
     return JSON.stringify(this.state);

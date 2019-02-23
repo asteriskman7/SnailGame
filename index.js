@@ -7,10 +7,15 @@ const app = {
 
     app.levelList = ['walk', 'koch', 'hilbert', 'fourier'];
     app.levels = {};
-    app.levels.walk = new Walk(document.getElementById('cwalk'), undefined, document.getElementById('imgWalkingSnail'));
-    app.levels.koch = new Koch(document.getElementById('ckoch'), app.levels.walk);
-    app.levels.hilbert = new Hilbert(document.getElementById('chilbert'), app.levels.koch);
-    app.levels.fourier = new Fourier(document.getElementById('cfourier'), app.levels.hilbert);
+    app.levels.walk = new Walk(document.getElementById('cwalk'), document.getElementById('imgWalkingSnail'));
+    app.levels.koch = new Koch(document.getElementById('ckoch'));
+    app.levels.hilbert = new Hilbert(document.getElementById('chilbert'));
+    app.levels.fourier = new Fourier(document.getElementById('cfourier'));
+
+    app.levels.walk.setRelations(null, app.levels.koch);
+    app.levels.koch.setRelations(app.levels.walk, app.levels.hilbert);
+    app.levels.hilbert.setRelations(app.levels.koch, app.levels.fourier);
+    app.levels.fourier.setRelations(app.levels.hilbert, null);
 
     app.load();
     app.tick();

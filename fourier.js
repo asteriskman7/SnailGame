@@ -1,14 +1,17 @@
 'use strict';
 
 class Fourier {
-  constructor(canvas, parent) {
+  constructor(canvas) {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d');
     this.canvas.style.display = 'inline';
-    this.parent = parent;
     this.state = {};
     this.t = 0;
     this.snailSpeed = 1;
+  }
+  setRelations(parent, child) {
+    this.parent = parent;
+    this.child = child;
   }
   getSaveString() {
     return JSON.stringify(this.state);
