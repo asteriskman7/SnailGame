@@ -10,6 +10,7 @@
     "Koch": true,
     "Hilbert": true,
     "Fourier": true,
-    "Buttons": true
+    "Buttons": true,
+    "letterPoints": true
   }
 }
