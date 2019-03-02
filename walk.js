@@ -77,49 +77,150 @@ class Walk {
   }
   drawGrass() {
     const ctx = this.ctx;
-    ctx.fillStyle = 'green';
-    ctx.fillRect(0, this.canvas.height * 0.8, this.canvas.width, this.canvas.height * 0.2);
+    const img = document.getElementById('imgGrass');
 
+    const imgy = this.canvas.height * 0.8 - 10;
+    const imgx = (-this.xpos) % img.width;
+
+    ctx.drawImage(img, imgx, imgy);
+    ctx.drawImage(img, imgx + this.canvas.width, imgy);
+
+  }
+  getHillHeight(x, canvasx) {
     let noiseConfig = [
       {a: 128, s: 1/8},
       {a: 64,  s: 1/4},
       {a: 16,  s: 1/2},
       {a: 8,  s: 1},
-      {a: 4,   s: 2},
-      {a: 2,  s: 4},
+      {a: 0,   s: 2},
+      {a: 0,   s: 4},
     ];
 
-    const rate = 1.0;
+    const rate = 0.3;
     const seed = 0;
-    const xscale = 1//10;
-    const yscale = 0.6;
+    const xscale = 10;
+    const yscale = 0.3;
 
-
-    for (let i = 0; i < this.canvas.width; i++) {
-      let c = yscale * fnoise((this.xpos*rate + i)/xscale, noiseConfig) - 20;
-
-      ctx.strokeStyle = `hsl(123, ${c}%, 33%)`;
-      ctx.beginPath();
-      ctx.moveTo(i, this.canvas.height * 0.8);
-      ctx.lineTo(i, this.canvas.height);
-      ctx.stroke();
-    }
+    return yscale * fnoise((x*rate + canvasx)/xscale, noiseConfig) + 120;
   }
-  addCoins(v) {
+  drawHills() {
+    const ctx = this.ctx;
+    let noiseConfig = [
+      {a: 128, s: 1/8},
+      {a: 64,  s: 1/4},
+      {a: 16,  s: 1/2},
+      {a: 8,  s: 1},
+      {a: 0,   s: 2},
+      {a: 0,   s: 4},
+    ];
+
+    const rate = 0.3;
+    const seed = 0;
+    const xscale = 10;
+    const yscale = 0.3;
+
+    ctx.beginPath();
+    let firstHeight = this.getHillHeight(this.xpos, 0); //yscale * fnoise((this.xpos*rate + 0)/xscale, noiseConfig) + 120;
+    ctx.moveTo(0, firstHeight);
+    let lastHeight;
+    for (let i = 1; i < this.canvas.width; i++) {
+      let height = this.getHillHeight(this.xpos, i); //yscale * fnoise((this.xpos*rate + i)/xscale, noiseConfig) + 120;
+      lastHeight = height;
+      ctx.lineTo(i, height);
+    }
+    ctx.lineTo(this.canvas.width+10, lastHeight);
+    ctx.lineTo(this.canvas.width+10, this.canvas.height+10);
+    ctx.lineTo(-10, this.canvas.height + 10);
+    ctx.lineTo(-10, firstHeight);
+    ctx.fillStyle = '#0a5410';
+    ctx.fill();
+    ctx.strokeStyle = '#073b0b';
+    ctx.stroke();
+  }
+  getMountainHeight(x, canvasx) {
+    let noiseConfig = [
+      {a: 128, s: 1/8},
+      {a: 64,  s: 1/4},
+      {a: 16,  s: 1/2},
+      {a: 0,  s: 1},
+      {a: 0,   s: 2},
+      {a: 0,   s: 4},
+    ];
+
+    const rate = 0.1;
+    const seed = 8755;
+    const xscale = 10;
+    const yscale = 0.4;
+
+    return yscale * fnoise((x*rate + canvasx + seed)/xscale, noiseConfig) + 80;
+  }
+  drawMountains() {
+    const ctx = this.ctx;
+
+    let noiseConfig = [
+      {a: 128, s: 1/8},
+      {a: 64,  s: 1/4},
+      {a: 16,  s: 1/2},
+      {a: 0,  s: 1},
+      {a: 0,   s: 2},
+      {a: 0,   s: 4},
+    ];
+
+    const rate = 0.1;
+    const seed = 8755;
+    const xscale = 10;
+    const yscale = 0.4;
+
+    ctx.beginPath();
+    let firstHeight = this.getMountainHeight(this.xpos, 0);
+    ctx.moveTo(0, firstHeight);
+    let lastHeight;
+    for (let i = 1; i < this.canvas.width; i++) {
+      let height = this.getMountainHeight(this.xpos, i);
+      lastHeight = height;
+      ctx.lineTo(i, height);
+    }
+    ctx.lineTo(this.canvas.width+10, lastHeight);
+    ctx.lineTo(this.canvas.width+10, this.canvas.height+10);
+    ctx.lineTo(-10, this.canvas.height + 10);
+    ctx.lineTo(-10, firstHeight);
+    ctx.fillStyle = 'grey';
+    ctx.fill();
+    ctx.strokeStyle = '#505050';
+    ctx.stroke();
+  }
+  drawSky() {
+    const ctx = this.ctx;
+    ctx.fillStyle = '#3998af';
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+  addCoins(v, z) {
     const coinScore = v * Math.random();
-    if (coinScore > 1.4) {
-      this.coins.push({x: this.xpos, val: 1});
+    if (coinScore > 1.5) {
+      this.coins.push({x: this.xpos, z: z, val: 1});
     }
   }
-  drawCoins() {
+  drawCoins(z) {
+    const speed = [1, 0.3, 0.1][z];
+    const yf = [
+      (canvasx) => this.canvas.height * 0.8,
+      (canvasx) => this.getHillHeight(this.xpos, canvasx),
+      (canvasx) => this.getMountainHeight(this.xpos, canvasx)
+    ][z];
+
     this.coins.forEach( v => {
-      this.ctx.fillStyle = 'yellow';
-      this.ctx.fillText(v.val, this.canvas.width - (this.xpos - v.x), this.canvas.height * 0.8);
+      if (v.z === z) {
+        this.ctx.fillStyle = 'yellow';
+        const canvasx = this.canvas.width - (this.xpos * speed - v.x);
+        const y = yf(canvasx);
+        this.ctx.fillText(v.val, this.canvas.width - (this.xpos * speed - v.x), y);
+      }
     });
   }
   getCoins() {
+    const speedMap = [1, 0.3, 0.1];
     this.coins = this.coins.filter( v => {
-      const relx = this.canvas.width - (this.xpos - v.x);
+      const relx = this.canvas.width - (this.xpos*speedMap[v.z] - v.x);
       if (relx <= 195) {
         this.state.coins += v.val;
         return false;
@@ -138,12 +239,13 @@ class Walk {
     ctx.fillText(this.xpos, 30, 60);
     ctx.fillText(this.state.coins, 30, 90);
 
-    //drawSky();
-    //drawMountains();
-    //drawHills();
+    this.drawSky();
+    this.drawMountains();
+    this.drawCoins(2);
+    this.drawHills();
+    this.drawCoins(1);
     this.drawGrass();
-    //drawMinuteMarkers();
-    this.drawCoins();
+    this.drawCoins(0);
     this.drawSnail(this.t);
     this.buttons.draw(this.mousePos);
 
@@ -156,7 +258,9 @@ class Walk {
       if (!clicked) {
         this.t += this.snailSpeed * deltaTime / 1000;
         const v = Math.max(0, this.snailSpeed * this.groundSpeed * Math.sin(this.t * 16));
-        this.addCoins(v);
+        this.addCoins(v, 0);
+        this.addCoins(v, 1);
+        this.addCoins(v, 2);
         this.xpos += v;
       }
     }
