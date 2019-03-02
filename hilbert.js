@@ -140,4 +140,7 @@ class Hilbert {
     this.edgeCount = edgeCount;
     this.level = n;
   }
+  feed() {
+
+  }
 }
