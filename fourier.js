@@ -11,6 +11,7 @@ class Fourier {
     this.setLevel(2);
     this.loopTime = 5;
     this.lastDrawEdges = 0;
+    this.drawLimit = 5;
   }
   setRelations(parent, child) {
     this.parent = parent;
@@ -48,14 +49,18 @@ class Fourier {
       const angle = unit.freq * this.angle;
       const dx = unit.mag * Math.cos(angle + unit.phase);
       const dy = unit.mag * Math.sin(angle + unit.phase);
-      ctx.beginPath();
-      ctx.arc(cx, cy, unit.mag, 0, Math.PI * 2);
-      ctx.stroke();
+      if (unit.mag > this.drawLimit) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, unit.mag, 0, Math.PI * 2);
+        ctx.stroke();
+      }
       cx += dx;
       cy += dy;
-      ctx.beginPath();
-      ctx.arc(cx, cy, 3, 0, Math.PI * 2);
-      ctx.fill();
+      if (unit.mag > this.drawLimit) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
     });
 
     if (this.points.length >= this.units.length) {
