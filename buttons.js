@@ -10,21 +10,37 @@ class Buttons {
       fgcolor: 'black',
       bgcolor: 'white',
       strokecolor: 'black',
+      hover: false,
       ...options};
   }
   add(x, y, w, h, text, callback, options) {
     this.buttons.push({rect: {x1: x, y1: y, x2: x + w, y2: y + h, w, h}, text, callback, options});
   }
   click(event) {
+    if (event.consumed) {return false;}
+    event.consumed = true;
     const c = this._getCursorPosition(event);
     let clicked = false;
     this.buttons.forEach( v => {
-      if (this._isPointInRect(c, v.rect)) {
+      const hover = v.options && v.options.hover;
+      if (!hover && this._isPointInRect(c, v.rect)) {
         v.callback();
         clicked = true;
       }
     });
     return clicked;
+  }
+  hover(event) {
+    const c = this._getCursorPosition(event);
+    let hovered = false;    
+    this.buttons.forEach( v => {
+      const hover = v.options && v.options.hover;
+      if (hover && this._isPointInRect(c, v.rect)) {
+        v.callback();
+        hovered = true;
+      }
+    });
+    return hovered;
   }
   _isPointInRect(pt, rect) {
     return pt.x >= rect.x1 && pt.x <= rect.x2 && pt.y >= rect.y1 && pt.y <= rect.y2;

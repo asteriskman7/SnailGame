@@ -5,12 +5,31 @@ class Koch {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d');
     this.canvas.style.display = 'inline';
+
+    this.mousePressed = undefined;
+    this.mousePos = undefined;
+    this.canvas.onmousedown = (e) => this.onmousedown.call(this, e);
+    this.canvas.onmouseup = (e) => this.onmouseup.call(this, e);
+    this.canvas.onmousemove = (e) => this.onmousemove.call(this, e);
+
     this.state = {};
     this.t = 0;
     this.snailSpeed = 1;
-    this.setLevel(2);
+    this.setLevel(0);
     this.loopTime = 5;
     this.lastDrawEdges = 0;
+
+    this.buttons = new Buttons(this.canvas, {
+      font: '10 Courier',
+      fgcolor: 'red',
+      bgcolor: 'grey',
+      strokecolor: 'black'
+    });
+
+    this.buttons.add(canvas.width - 100, 0, 100, 30, 'hello', () => {console.log('button pressed');});
+    this.buttons.add(canvas.width * 0.05, canvas.height * 0.2, 100, 100, 'ONE', () => {console.log('hover1');}, {bgcolor: '#F0808040', hover: true});
+    this.buttons.add(canvas.width * 0.85, canvas.height * 0.2, 100, 100, 'TWO', () => {console.log('hover2');}, {bgcolor: '#F0808040',hover: true});
+    this.buttons.add(canvas.width * 0.5, canvas.height * 0.8, 100, 100, 'THREE', () => {console.log('hover3');}, {bgcolor: '#F0808040',hover: true});
   }
   setRelations(parent, child) {
     this.parent = parent;
@@ -23,6 +42,15 @@ class Koch {
     const loadedState = JSON.parse(str);
     //let anything from loadedState override current state
     this.state = {...this.state,...loadedState};
+  }
+  onmousedown(e) {
+    this.mousePressed = e;
+  }
+  onmouseup(e) {
+    this.mousePressed = undefined;
+  }
+  onmousemove(e) {
+    this.mousePos = e;
   }
   draw(timestamp, deltaTime) {
     const ctx = this.ctx;
@@ -98,9 +126,19 @@ class Koch {
     }
 
     ctx.restore();
+
+    this.buttons.draw(this.mousePos);
+
   }
   update(timestamp, deltaTime) {
     this.t += this.snailSpeed * deltaTime / 1000;
+    const hovered = this.buttons.hover(this.mousePos);
+    if (this.mousePressed !== undefined) {
+      const clicked = this.buttons.click(this.mousePressed);
+      if (!clicked) {
+
+      }
+    }
 
   }
   feed(val) {
