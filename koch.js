@@ -15,7 +15,7 @@ class Koch {
     this.state = {};
     this.t = 0;
     this.snailSpeed = 1;
-    this.setLevel(0);
+    this.setLevel(2);
     this.loopTime = 5;
     this.lastDrawEdges = 0;
 
@@ -27,9 +27,17 @@ class Koch {
     });
 
     this.buttons.add(canvas.width - 100, 0, 100, 30, 'hello', () => {console.log('button pressed');});
-    this.buttons.add(canvas.width * 0.05, canvas.height * 0.2, 100, 100, 'ONE', () => {console.log('hover1');}, {bgcolor: '#F0808040', hover: true});
-    this.buttons.add(canvas.width * 0.85, canvas.height * 0.2, 100, 100, 'TWO', () => {console.log('hover2');}, {bgcolor: '#F0808040',hover: true});
-    this.buttons.add(canvas.width * 0.5, canvas.height * 0.8, 100, 100, 'THREE', () => {console.log('hover3');}, {bgcolor: '#F0808040',hover: true});
+
+    const hoverButtonOptions = {
+      shape: 'circle',
+      strokecolor: '#00000000',
+      bgcolor: '#F0808040',
+      hovercolor: '#00F00040',
+      hover: true};
+
+    this.buttons.add(canvas.width * 0.1, canvas.height * 0.27, 50, 50, 'ONE', () => {console.log('hover1');},  hoverButtonOptions);
+    this.buttons.add(canvas.width * 0.9, canvas.height * 0.27, 50, 50, 'TWO', () => {console.log('hover2');},  hoverButtonOptions);
+    this.buttons.add(canvas.width * 0.5, canvas.height * 0.9, 50, 50, 'THREE', () => {console.log('hover3');}, hoverButtonOptions);
   }
   setRelations(parent, child) {
     this.parent = parent;

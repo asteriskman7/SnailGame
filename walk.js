@@ -253,6 +253,7 @@ class Walk {
   }
   update(timestamp, deltaTime) {
     this.getCoins();
+    const hovered = this.buttons.hover(this.mousePos);
     if (this.mousePressed !== undefined) {
       const clicked = this.buttons.click(this.mousePressed);
       if (!clicked) {

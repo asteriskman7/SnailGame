@@ -9,12 +9,25 @@ class Buttons {
       font: '20 Courier',
       fgcolor: 'black',
       bgcolor: 'white',
+      hovercolor: 'white',
       strokecolor: 'black',
       hover: false,
+      shape: 'rect',
       ...options};
   }
   add(x, y, w, h, text, callback, options) {
-    this.buttons.push({rect: {x1: x, y1: y, x2: x + w, y2: y + h, w, h}, text, callback, options});
+    let comboOptions = {...this.options,...options};
+    switch (comboOptions.shape) {
+      case 'rect':
+        this.buttons.push({shape: {type: comboOptions.shape, x1: x, y1: y, x2: x + w, y2: y + h, w, h}, text, callback, options: comboOptions, hovering: false});
+        break;
+      case 'circle':
+        this.buttons.push({shape: {type: comboOptions.shape, x, y, r: w}, text, callback, options: comboOptions, hovering: false});
+        break;
+      default:
+        throw 'bad shape';
+    }
+
   }
   click(event) {
     if (event.consumed) {return false;}
@@ -23,7 +36,7 @@ class Buttons {
     let clicked = false;
     this.buttons.forEach( v => {
       const hover = v.options && v.options.hover;
-      if (!hover && this._isPointInRect(c, v.rect)) {
+      if (!hover && this._isPointInShape(c, v.shape)) {
         v.callback();
         clicked = true;
       }
@@ -32,10 +45,12 @@ class Buttons {
   }
   hover(event) {
     const c = this._getCursorPosition(event);
-    let hovered = false;    
+    let hovered = false;
     this.buttons.forEach( v => {
       const hover = v.options && v.options.hover;
-      if (hover && this._isPointInRect(c, v.rect)) {
+      v.hovering = this._isPointInShape(c, v.shape);
+
+      if (hover && v.hovering) {
         v.callback();
         hovered = true;
       }
@@ -44,6 +59,21 @@ class Buttons {
   }
   _isPointInRect(pt, rect) {
     return pt.x >= rect.x1 && pt.x <= rect.x2 && pt.y >= rect.y1 && pt.y <= rect.y2;
+  }
+  _isPointInCircle(pt, circle) {
+    const dx = pt.x - circle.x;
+    const dy = pt.y - circle.y;
+    return dx * dx + dy * dy <= circle.r * circle.r;
+  }
+  _isPointInShape(pt, shape) {
+    switch (shape.type) {
+      case 'rect':
+        return this._isPointInRect(pt, shape);
+      case 'circle':
+        return this._isPointInCircle(pt, shape);
+      default:
+        throw 'bad shape';
+    }
   }
   _getCursorPosition(event) {
     //modified from https://stackoverflow.com/questions/55677/how-do-i-get-the-coordinates-of-a-mouse-click-on-a-canvas-element
@@ -64,24 +94,51 @@ class Buttons {
     ctx.textBaseline = 'middle';
     const c = this._getCursorPosition(event);
     this.buttons.forEach( v => {
-      const options = {...this.options, ...v.options};
+      const options = v.options; //{...this.options, ...v.options};
 
-      const hover = this._isPointInRect(c, v.rect);
-
-      ctx.fillStyle = options.bgcolor;
-      ctx.fillRect(v.rect.x1, v.rect.y1, v.rect.w, v.rect.h);
-
+      ctx.fillStyle = v.hovering ? options.hovercolor : options.bgcolor;
       ctx.font = options.font;
-      ctx.fillStyle = options.fgcolor;
-      ctx.fillText(v.text, v.rect.x1 + v.rect.w * 0.5, v.rect.y1 + v.rect.h * 0.5);
 
-      if (hover) {
+      let textx;
+      let texty;
 
+      switch (v.shape.type) {
+        case 'rect':
+          ctx.fillRect(v.shape.x1, v.shape.y1, v.shape.w, v.shape.h);
+          textx = v.shape.x1 + v.shape.w * 0.5;
+          texty = v.shape.y1 + v.shape.h * 0.5;
+          break;
+        case 'circle':
+          ctx.beginPath();
+          ctx.arc(v.shape.x, v.shape.y, v.shape.r, 0, Math.PI * 2);
+          ctx.fill();
+          textx = v.shape.x;
+          texty = v.shape.y;
+          break;
+        default:
+          throw 'bad shape';
       }
 
+      ctx.fillStyle = options.fgcolor;
+      ctx.fillText(v.text, textx, texty);
+
+      //if (v.hovering) {     }
+
       ctx.strokeStyle = options.strokecolor;
-      ctx.lineWidth = hover ? 3 : 1;
-      ctx.strokeRect(v.rect.x1, v.rect.y1, v.rect.w, v.rect.h);
+      ctx.lineWidth = v.hovering ? 3 : 1;
+      switch (v.shape.type) {
+        case 'rect':
+          ctx.strokeRect(v.shape.x1, v.shape.y1, v.shape.w, v.shape.h);
+          break;
+        case 'circle':
+          ctx.beginPath();
+          ctx.arc(v.shape.x, v.shape.y, v.shape.r, 0, Math.PI * 2);
+          ctx.stroke();
+          break;
+        default:
+          throw 'bad shape';
+      }
+
     });
 
     ctx.restore();
