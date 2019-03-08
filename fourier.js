@@ -12,6 +12,22 @@ class Fourier {
     this.loopTime = 5;
     this.lastDrawEdges = 0;
     this.drawLimit = 5;
+
+    this.storedMoveTime = this.loopTime * 1000;
+    this.earnFactor = 1;
+    this.maxStoredTime = this.loopTime * 1000;
+    this.drawEnable = false;
+    this.lastMousePos = {x: -100, y: -100};
+    this.mousePos = this.lastMousePos;
+
+    //this.mousePressed = undefined;
+    //this.mousePos = undefined;
+    //this.canvas.onmousedown = (e) => this.onmousedown.call(this, e);
+    //this.canvas.onmouseup = (e) => this.onmouseup.call(this, e);
+    this.canvas.onmousemove = (e) => this.onmousemove.call(this, e);
+    //this.canvas.onkeypress = (e) => this.onkeypress.call(this, e);
+
+
   }
   setRelations(parent, child) {
     this.parent = parent;
@@ -26,6 +42,7 @@ class Fourier {
     this.state = {...this.state,...loadedState};
   }
   draw(timestamp, deltaTime) {
+    if (!this.drawEnable) {return;}
     const ctx = this.ctx;
 
     ctx.save();
@@ -65,9 +82,9 @@ class Fourier {
 
     if (this.points.length >= this.units.length) {
       this.points = [];
+      this.parent.feed(1);
     }
     this.points.push({x: cx, y: cy});
-    this.parent.feed(1);
 
     ctx.strokeStyle = 'grey';
     ctx.beginPath();
@@ -97,8 +114,23 @@ class Fourier {
   }
   update(timestamp, deltaTime) {
     //this.angle += this.snailSpeed * deltaTime / 1000;
-    this.angle += Math.PI * 2 / this.units.length;
+    if (this.mousePos.x !== this.lastMousePos.x || this.mousePos.y !== this.lastMousePos.y) {
+      this.storedMoveTime += this.earnFactor * deltaTime;
+    }
+    this.storedMoveTime = Math.min(this.maxStoredTime, this.storedMoveTime);
+    this.lastMousePos = this.mousePos;
+    if (this.storedMoveTime > deltaTime) {
+      const stepTime = Math.min(deltaTime, this.storedMoveTime);
+      this.angle += Math.PI * 2 / this.units.length;
+      this.storedMoveTime -= stepTime;
+      this.drawEnable = true;
+    } else {
+      this.drawEnable = false;
+    }
     //this.angle += Math.PI * 2 / 200;
+  }
+  getMessage() {
+    return 'hiaeiiaeh';
   }
   setLevel(n) {
     const points = [];
@@ -114,7 +146,7 @@ class Fourier {
     }
     */
 
-    const msg = 'hiaeiiaeh';
+    const msg = this.getMessage();
     let dx = -40;
     for (let j = 0; j < msg.length; j++) {
       const c = msg[j];
@@ -164,5 +196,8 @@ class Fourier {
     });
 
     return X;
+  }
+  onmousemove(event) {
+    this.mousePos = {x: event.clientX, y: event.clientY};
   }
 }
