@@ -17,17 +17,19 @@ class Buttons {
   }
   add(x, y, w, h, text, callback, options) {
     let comboOptions = {...this.options,...options};
+    let newButton;
     switch (comboOptions.shape) {
       case 'rect':
-        this.buttons.push({shape: {type: comboOptions.shape, x1: x, y1: y, x2: x + w, y2: y + h, w, h}, text, callback, options: comboOptions, hovering: false});
+        newButton = {shape: {type: comboOptions.shape, x1: x, y1: y, x2: x + w, y2: y + h, w, h}, text, callback, options: comboOptions, hovering: false};
         break;
       case 'circle':
-        this.buttons.push({shape: {type: comboOptions.shape, x, y, r: w}, text, callback, options: comboOptions, hovering: false});
+        newButton = {shape: {type: comboOptions.shape, x, y, r: w}, text, callback, options: comboOptions, hovering: false};
         break;
       default:
         throw 'bad shape';
     }
-
+    this.buttons.push(newButton);
+    return newButton;
   }
   click(event) {
     if (event.consumed) {return false;}

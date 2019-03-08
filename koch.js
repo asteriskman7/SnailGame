@@ -20,7 +20,9 @@ class Koch {
     this.lastDrawEdges = 0;
 
     this.hoverTarget = 0;
-    this.hoverRemaining = this.loopTime * 1000 / 3;
+    this.hoverRemaining = this.loopTime * 1000 / 6;
+    this.storedMoveTime = 0;
+    this.hoverRatio = 2;
 
     this.buttons = new Buttons(this.canvas, {
       font: '10 Courier',
@@ -35,12 +37,16 @@ class Koch {
       shape: 'circle',
       strokecolor: '#00000000',
       bgcolor: '#F0808040',
-      hovercolor: '#00F00040',
+      hovercolor: '#F0000040',
       hover: true};
 
-    this.buttons.add(canvas.width * 0.1, canvas.height * 0.27, 50, 50, '1', () => {this.hoverButton(0);}, hoverButtonOptions);
-    this.buttons.add(canvas.width * 0.9, canvas.height * 0.27, 50, 50, '2', () => {this.hoverButton(1);}, hoverButtonOptions);
-    this.buttons.add(canvas.width * 0.5, canvas.height * 0.9,  50, 50, '3', () => {this.hoverButton(2);}, hoverButtonOptions);
+    this.hoverButtons = [];
+
+    this.hoverButtons.push(this.buttons.add(canvas.width * 0.1, canvas.height * 0.27, 50, 50, '1', () => {this.hoverButton(0);}, hoverButtonOptions));
+    this.hoverButtons.push(this.buttons.add(canvas.width * 0.9, canvas.height * 0.27, 50, 50, '2', () => {this.hoverButton(1);}, hoverButtonOptions));
+    this.hoverButtons.push(this.buttons.add(canvas.width * 0.5, canvas.height * 0.9,  50, 50, '3', () => {this.hoverButton(2);}, hoverButtonOptions));
+
+    this.setHoverColors();
   }
   setRelations(parent, child) {
     this.parent = parent;
@@ -146,14 +152,22 @@ class Koch {
     this.hovering = undefined;
     const hovered = this.buttons.hover(this.mousePos);
 
+    if (this.storedMoveTime > 0) {
+      const stepTime = Math.min(deltaTime, this.storedMoveTime);
+      this.t += this.snailSpeed * stepTime / 1000;
+      this.storedMoveTime -= stepTime;
+    }
     if (this.hovering !== undefined) {
-      if (this.hovering === this.hoverTarget && this.hoverRemaining > 0) {
-        this.t += this.snailSpeed * deltaTime / 1000;
+      if (this.hovering === this.hoverTarget) {
         this.hoverRemaining -= deltaTime;
+        this.storedMoveTime += deltaTime * this.hoverRatio;
       }
+
       if (this.hoverRemaining <= 0) {
-        this.hoverRemaining = this.loopTime * 1000 / 3 + this.hoverRemaining;
+        this.hoverRemaining = this.loopTime * 1000 / 6 + this.hoverRemaining;
+
         this.hoverTarget = (this.hoverTarget + 1) % 3;
+        this.setHoverColors();
       }
     }
 
@@ -167,6 +181,11 @@ class Koch {
   }
   hoverButton(n) {
     this.hovering = n;
+  }
+  setHoverColors(){
+    for (let i = 0; i < 3; i++) {
+      this.hoverButtons[i].options.hovercolor = (this.hoverTarget === i) ? '#00F00040' : '#F0000040';
+    }
   }
   feed(val) {
 

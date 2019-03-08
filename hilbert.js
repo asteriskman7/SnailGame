@@ -8,7 +8,7 @@ class Hilbert {
     this.state = {};
     this.t = 0;
     this.snailSpeed = 1;
-    this.setLevel(3);
+    this.setLevel(2);
     this.loopTime = 5;
     this.lastDrawEdges = 0;
   }
