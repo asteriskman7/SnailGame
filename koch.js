@@ -188,7 +188,7 @@ class Koch {
     }
   }
   feed(val) {
-
+    this.storedMoveTime += this.loopTime * 1000;
   }
   setLevel(n) {
     let cmd = 'L--L--L'.split``;
