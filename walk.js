@@ -28,6 +28,8 @@ class Walk {
     this.xpos = 0;
     this.coins = [];
 
+    this.storedMoveTime = 5000;
+
     this.buttons = new Buttons(this.canvas, {
       font: '10 Courier',
       fgcolor: 'red',
@@ -254,20 +256,22 @@ class Walk {
   update(timestamp, deltaTime) {
     this.getCoins();
     const hovered = this.buttons.hover(this.mousePos);
-    if (this.mousePressed !== undefined) {
-      const clicked = this.buttons.click(this.mousePressed);
-      if (!clicked) {
+    if (this.mousePressed !== undefined || this.storedMoveTime > 0) {
+      const clicked = this.mousePressed && this.buttons.click(this.mousePressed);
+      if (!clicked || this.storedMoveTime > 0) {
         this.t += this.snailSpeed * deltaTime / 1000;
         const v = Math.max(0, this.snailSpeed * this.groundSpeed * Math.sin(this.t * 16));
         this.addCoins(v, 0);
         this.addCoins(v, 1);
         this.addCoins(v, 2);
         this.xpos += v;
+        this.storedMoveTime -= deltaTime;
       }
     }
   }
   feed(val) {
-    this.state.coins += val;
+    //this.state.coins += val;
+    this.storedMoveTime += 5000;
   }
 }
 
