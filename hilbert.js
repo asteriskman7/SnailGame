@@ -8,9 +8,21 @@ class Hilbert {
     this.state = {};
     this.t = 0;
     this.snailSpeed = 1;
-    this.setLevel(2);
+    this.setLevel(0);
     this.loopTime = 5;
     this.lastDrawEdges = 0;
+
+    this.storedMoveTime = 0 * this.loopTime * 1000;
+    this.lastKey = undefined;
+    this.keyTime = 200;
+    this.maxStoredTime = this.loopTime * 1000;
+
+    //this.mousePressed = undefined;
+    //this.mousePos = undefined;
+    this.canvas.onmousedown = (e) => this.onmousedown.call(this, e);
+    //this.canvas.onmouseup = (e) => this.onmouseup.call(this, e);
+    //this.canvas.onmousemove = (e) => this.onmousemove.call(this, e);
+    this.canvas.onkeypress = (e) => this.onkeypress.call(this, e);
   }
   setRelations(parent, child) {
     this.parent = parent;
@@ -102,7 +114,11 @@ class Hilbert {
     ctx.restore();
   }
   update(timestamp, deltaTime) {
-    this.t += this.snailSpeed * deltaTime / 1000;
+    if (this.storedMoveTime > 0) {
+      const stepTime = Math.min(deltaTime, this.storedMoveTime);
+      this.t += this.snailSpeed * stepTime / 1000;
+      this.storedMoveTime -= stepTime;
+    }
   }
   setLevel(n) {
     let cmd = ['A'];
@@ -142,5 +158,15 @@ class Hilbert {
   }
   feed() {
 
+  }
+  onkeypress(event) {
+    const key = event.key;
+    if (key !== this.lastKey) {
+      this.storedMoveTime += this.keyTime;
+      this.lastKey = key;
+    }
+  }
+  onmousedown(event) {
+    this.storedMoveTime += this.keyTime;
   }
 }
