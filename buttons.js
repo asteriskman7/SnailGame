@@ -9,8 +9,8 @@ class Buttons {
       font: '20 Courier',
       fgcolor: 'black',
       bgcolor: 'white',
-      hovercolor: 'white',
-      strokecolor: 'black',
+      hovercolor: 'green',
+      strokecolor: 'red',
       hover: false,
       shape: 'rect',
       ...options};
