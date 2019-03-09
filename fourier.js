@@ -17,16 +17,21 @@ class Fourier {
     this.earnFactor = 1;
     this.maxStoredTime = this.loopTime * 1000;
     this.drawEnable = false;
-    this.lastMousePos = {x: -100, y: -100};
+    this.lastMousePos = {clientX: -100, clientY: -100};
     this.mousePos = this.lastMousePos;
 
-    //this.mousePressed = undefined;
+
+
+    this.mousePressed = undefined;
     //this.mousePos = undefined;
-    //this.canvas.onmousedown = (e) => this.onmousedown.call(this, e);
-    //this.canvas.onmouseup = (e) => this.onmouseup.call(this, e);
+    this.canvas.onmousedown = (e) => this.onmousedown.call(this, e);
+    this.canvas.onmouseup = (e) => this.onmouseup.call(this, e);
     this.canvas.onmousemove = (e) => this.onmousemove.call(this, e);
     //this.canvas.onkeypress = (e) => this.onkeypress.call(this, e);
 
+    this.buttons = new Buttons(this.canvas);
+
+    this.buttons.add(0, 0, 100, 30, 'hello', () => {console.log('fourier button');});
 
   }
   setRelations(parent, child) {
@@ -40,6 +45,15 @@ class Fourier {
     const loadedState = JSON.parse(str);
     //let anything from loadedState override current state
     this.state = {...this.state,...loadedState};
+  }
+  onmousedown(e) {
+    this.mousePressed = e;
+  }
+  onmouseup(e) {
+    this.mousePressed = undefined;
+  }
+  onmousemove(e) {
+    this.mousePos = e;
   }
   draw(timestamp, deltaTime) {
     if (!this.drawEnable) {return;}
@@ -96,10 +110,13 @@ class Fourier {
     ctx.stroke();
 
     ctx.restore();
+
+    this.buttons.draw(this.mousePos);
   }
   update(timestamp, deltaTime) {
+    const hovered = this.buttons.hover(this.mousePos);
 
-    if (this.mousePos.x !== this.lastMousePos.x || this.mousePos.y !== this.lastMousePos.y) {
+    if (this.mousePos.clientX !== this.lastMousePos.clientX || this.mousePos.clientY !== this.lastMousePos.clientY) {
       this.storedMoveTime += this.earnFactor * deltaTime;
     }
     this.storedMoveTime = Math.min(this.maxStoredTime, this.storedMoveTime);
@@ -111,6 +128,10 @@ class Fourier {
       this.drawEnable = true;
     } else {
       this.drawEnable = false;
+    }
+
+    if (this.mousePressed !== undefined) {
+      const clicked = this.buttons.click(this.mousePressed);
     }
 
   }
@@ -179,8 +200,5 @@ class Fourier {
     });
 
     return X;
-  }
-  onmousemove(event) {
-    this.mousePos = {x: event.clientX, y: event.clientY};
   }
 }

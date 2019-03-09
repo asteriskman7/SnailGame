@@ -12,17 +12,20 @@ class Hilbert {
     this.loopTime = 5;
     this.lastDrawEdges = 0;
 
-    this.storedMoveTime = 0 * this.loopTime * 1000;
+    this.storedMoveTime = this.loopTime * 1000;
     this.lastKey = undefined;
     this.keyTime = 200;
     this.maxStoredTime = this.loopTime * 1000;
 
-    //this.mousePressed = undefined;
-    //this.mousePos = undefined;
+    this.mousePressed = undefined;
+    this.mousePos = undefined;
     this.canvas.onmousedown = (e) => this.onmousedown.call(this, e);
-    //this.canvas.onmouseup = (e) => this.onmouseup.call(this, e);
-    //this.canvas.onmousemove = (e) => this.onmousemove.call(this, e);
+    this.canvas.onmouseup = (e) => this.onmouseup.call(this, e);
+    this.canvas.onmousemove = (e) => this.onmousemove.call(this, e);
     this.canvas.onkeypress = (e) => this.onkeypress.call(this, e);
+
+    this.buttons = new Buttons(this.canvas);
+    this.buttons.add(0, 0, 100, 30, 'hello', () => {console.log('hilbert button');});
   }
   setRelations(parent, child) {
     this.parent = parent;
@@ -35,6 +38,16 @@ class Hilbert {
     const loadedState = JSON.parse(str);
     //let anything from loadedState override current state
     this.state = {...this.state,...loadedState};
+  }
+  onmousedown(e) {
+    this.mousePressed = e;
+    this.storedMoveTime += this.keyTime;
+  }
+  onmouseup(e) {
+    this.mousePressed = undefined;
+  }
+  onmousemove(e) {
+    this.mousePos = e;
   }
   draw(timestamp, deltaTime) {
     const ctx = this.ctx;
@@ -112,13 +125,22 @@ class Hilbert {
     }
 
     ctx.restore();
+    this.buttons.draw(this.mousePos);
   }
   update(timestamp, deltaTime) {
+
+    const hovered = this.buttons.hover(this.mousePos);
+
     if (this.storedMoveTime > 0) {
       const stepTime = Math.min(deltaTime, this.storedMoveTime);
       this.t += this.snailSpeed * stepTime / 1000;
       this.storedMoveTime -= stepTime;
     }
+
+    if (this.mousePressed !== undefined) {
+      const clicked = this.buttons.click(this.mousePressed);
+    }
+
   }
   setLevel(n) {
     let cmd = ['A'];
@@ -157,7 +179,7 @@ class Hilbert {
     this.level = n;
   }
   feed() {
-
+    this.storedMoveTime += this.loopTime * 1000;
   }
   onkeypress(event) {
     const key = event.key;
@@ -165,8 +187,5 @@ class Hilbert {
       this.storedMoveTime += this.keyTime;
       this.lastKey = key;
     }
-  }
-  onmousedown(event) {
-    this.storedMoveTime += this.keyTime;
   }
 }
