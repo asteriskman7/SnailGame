@@ -7,7 +7,10 @@ const app = {
 
     app.levelList = ['walk', 'koch', 'hilbert', 'fourier'];
     app.levels = {};
-    app.levels.walk = new Walk(document.getElementById('cwalk'), document.getElementById('imgWalkingSnail'));
+    app.levels.walk = new Walk(document.getElementById('cwalk'),
+      document.getElementById('imgWalkingSnail'),
+      document.getElementById('imgCoin')
+    );
     app.levels.koch = new Koch(document.getElementById('ckoch'));
     app.levels.hilbert = new Hilbert(document.getElementById('chilbert'));
     app.levels.fourier = new Fourier(document.getElementById('cfourier'));

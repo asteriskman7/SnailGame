@@ -1,7 +1,7 @@
 'use strict';
 
 class Walk {
-  constructor(canvas, snailImage) {
+  constructor(canvas, snailImage, coinImage) {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d');
 
@@ -13,6 +13,7 @@ class Walk {
     this.canvas.onmousemove = (e) => this.onmousemove.call(this, e);
 
     this.snailImage = snailImage;
+    this.coinImage = coinImage;
 
     this.canvas.style.display = 'inline';
     this.state = {};
@@ -215,7 +216,9 @@ class Walk {
         this.ctx.fillStyle = 'yellow';
         const canvasx = this.canvas.width - (this.xpos * speed - v.x);
         const y = yf(canvasx);
-        this.ctx.fillText(v.val, this.canvas.width - (this.xpos * speed - v.x), y);
+        const x = this.canvas.width - (this.xpos * speed - v.x);
+        //this.ctx.fillText(v.val, this.canvas.width - (this.xpos * speed - v.x), y);
+        this.ctx.drawImage(this.coinImage, x, y - this.coinImage.height * 0.5);
       }
     });
   }
