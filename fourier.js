@@ -8,7 +8,7 @@ class Fourier {
     this.state = {};
     this.angle = 0;
     this.snailSpeed = 1;
-    this.setLevel(2);
+    this.setLevel(4);
     this.loopTime = 5;
     this.lastDrawEdges = 0;
     this.drawLimit = 5;
@@ -95,25 +95,10 @@ class Fourier {
     }
     ctx.stroke();
 
-    //test draw a letter
-    /*
-    const lp = letterPoints.i;
-    const s = 25;
-    ctx.beginPath();
-    ctx.moveTo(lp[0][0]*s, lp[0][1]*s);
-    for (let i = 1; i < lp.length; i++) {
-      ctx.lineTo(lp[i][0]*s, lp[i][1]*s);
-    }
-    ctx.stroke();
-    for (let i = 0; i < lp.length; i++) {
-      ctx.fillRect(lp[i][0]*s - 5, lp[i][1]*s - 5, 10, 10);
-    }
-    */
-
     ctx.restore();
   }
   update(timestamp, deltaTime) {
-    //this.angle += this.snailSpeed * deltaTime / 1000;
+
     if (this.mousePos.x !== this.lastMousePos.x || this.mousePos.y !== this.lastMousePos.y) {
       this.storedMoveTime += this.earnFactor * deltaTime;
     }
@@ -127,29 +112,29 @@ class Fourier {
     } else {
       this.drawEnable = false;
     }
-    //this.angle += Math.PI * 2 / 200;
+
   }
-  getMessage() {
-    return 'hiaeiiaeh';
+  getMessage(len) {
+    let result = '';
+    let source = letterPathLetters.slice();
+    while (source.length > 0) {
+      const choice = Math.floor(Math.random() * source.length);
+      result += source[choice];
+      source.splice(choice, 1);
+    }
+    while (result.length < len) {
+      result += letterPathLetters[Math.floor(Math.random() * letterPathLetters.length)];
+    }
+
+    return result;
   }
   setLevel(n) {
     const points = [];
 
-    /*
-    const pointCount = 200;
-    for (let i = 0; i < pointCount; i++) {
-      if ((i % 50) >= 25) {
-        points.push([i, pointCount]);
-      } else {
-        points.push([i, -pointCount]);
-      }
-    }
-    */
-
-    const msg = this.getMessage();
+    this.msg = this.getMessage(8);
     let dx = -40;
-    for (let j = 0; j < msg.length; j++) {
-      const c = msg[j];
+    for (let j = 0; j < this.msg.length; j++) {
+      const c = this.msg[j];
       const lp = letterPoints[c];
       const s = 7;
       for (let i = 0; i < lp.length; i++) {
@@ -158,9 +143,7 @@ class Fourier {
       dx += 10;
     }
 
-
-
-    const factor = 2;
+    const factor = [50,20,15,10,2][n];
     const reducedPoints = points.map( (v,i) => {
       let sumx = 0;
       let sumy = 0;
