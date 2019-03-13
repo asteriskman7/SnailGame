@@ -1,5 +1,15 @@
 'use strict';
 
+/*
+Upgrades:
+enable hills
+enable mountains
+increase coin value
+increase coin rate
+increase snail speed
+enable koch
+*/
+
 class Walk {
   constructor(canvas, snailImage, coinImage) {
     this.canvas = canvas;
@@ -16,11 +26,25 @@ class Walk {
     this.coinImage = coinImage;
 
     this.canvas.style.display = 'inline';
-    this.state = {};
     this.t = 0;
+    this.state = {};
     this.state.coins = 0;
-    this.snailSpeed = 0.5;
-    this.groundSpeed = 4;
+    this.state.showHills = false;
+    this.state.showMountains = false;
+    this.state.snailSpeed = 0.5;
+    this.state.coinRate = 0.95;
+    this.state.coinValue = 1;
+    this.state.upgrades = {
+      snailSpeed: 0,
+      showHills: 0,
+      showMountains: 0,
+      coinRate: 0,
+      coinValue: 0,
+      child: 0
+    };
+
+    this.groundSpeed = 5.0;
+
     this.snailDir = -1;
     this.snailSize = 1;
     this.snailMinSize = 0.8;
@@ -29,16 +53,49 @@ class Walk {
     this.xpos = 0;
     this.coins = [];
 
-    this.storedMoveTime = 5000;
+    this.storedMoveTime = 2000000;
 
     this.buttons = new Buttons(this.canvas, {
-      font: '10 Courier',
+      font: '20px Courier',
       fgcolor: 'red',
       bgcolor: 'grey',
       strokecolor: 'black'
     });
 
-    this.buttons.add(canvas.width - 100, 0, 100, 30, 'hello', () => {console.log('button pressed');});
+    this.buttons.add(0, 0, 100, 30, 'Speed', () => {this.buyUpgrade('snailSpeed');});
+    this.buttons.add(100, 0, 100, 30, 'Rate', () => {this.buyUpgrade('coinRate');});
+    this.buttons.add(200, 0, 100, 30, 'Value', () => {this.buyUpgrade('coinValue');});
+    this.buttons.add(300, 0, 100, 30, 'Hills', () => {this.buyUpgrade('showHills');});
+    this.buttons.add(400, 0, 100, 30, 'Mtns', () => {this.buyUpgrade('showMountains');});
+
+    this.buttons.add(this.canvas.width - 100, 0, 100, 30, 'Koch', () => {this.buyUpgrade('child');});
+
+    this.upgrades = {
+      snailSpeed: {
+        value: [1.0,1.5], //max shouldn't be higher than 10
+        cost:  [10,50]
+      },
+      showHills: {
+        value: [true],
+        cost: [100]
+      },
+      showMountains: {
+        value: [true],
+        cost: [1000]
+      },
+      coinRate: {
+        value: [2,4,8],
+        cost: [15,100,200]
+      },
+      coinValue: {
+        value: [3, 6],
+        cost: [2000, 3000]
+      },
+      child: {
+        value: [true],
+        cost: [5000]
+      }
+    }
   }
   setRelations(parent, child) {
     this.parent = parent;
@@ -107,6 +164,7 @@ class Walk {
     return yscale * fnoise((x*rate + canvasx)/xscale, noiseConfig) + 120;
   }
   drawHills() {
+    if (!this.state.showHills) {return;}
     const ctx = this.ctx;
     let noiseConfig = [
       {a: 128, s: 1/8},
@@ -158,6 +216,7 @@ class Walk {
     return yscale * fnoise((x*rate + canvasx + seed)/xscale, noiseConfig) + 80;
   }
   drawMountains() {
+    if (!this.state.showMountains) {return;}
     const ctx = this.ctx;
 
     let noiseConfig = [
@@ -199,8 +258,15 @@ class Walk {
   }
   addCoins(v, z) {
     const coinScore = v * Math.random();
-    if (coinScore > 1.5) {
-      this.coins.push({x: this.xpos, z: z, val: 1});
+
+
+    const maxValue = this.state.snailSpeed <= 0.5 ? 0.5/60 :  (this.state.snailSpeed * (7/9) + 2/9) / 60;
+
+    if (coinScore > maxValue * this.state.coinRate) {
+      //grass coins are value * 1
+      //hill coins are  value * 10
+      //mount coins are value * 100
+      this.coins.push({x: this.xpos, z: z, val: this.state.coinValue * Math.pow(10, z)});
     }
   }
   drawCoins(z) {
@@ -233,16 +299,25 @@ class Walk {
       return true;
     });
   }
+  drawCoinCount() {
+    const ctx = this.ctx;
+    ctx.font = '30px Courier';
+    ctx.fillStyle = 'black';
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'bottom';
+
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 4;
+    ctx.strokeText(this.state.coins, 30, this.canvas.height - 5);
+    ctx.fillText(this.state.coins, 30, this.canvas.height - 5);
+  }
   draw(timestamp, deltaTime) {
     const ctx = this.ctx;
     ctx.save();
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    ctx.font = '20 Courier';
-    ctx.fillStyle = 'red';
-    ctx.fillText(this.t, 30, 30);
-    ctx.fillText(this.xpos, 30, 60);
-    ctx.fillText(this.state.coins, 30, 90);
+
 
     this.drawSky();
     this.drawMountains();
@@ -252,6 +327,7 @@ class Walk {
     this.drawGrass();
     this.drawCoins(0);
     this.drawSnail(this.t);
+    this.drawCoinCount();
     this.buttons.draw(this.mousePos);
 
     ctx.restore();
@@ -262,12 +338,23 @@ class Walk {
     if (this.mousePressed !== undefined || this.storedMoveTime > 0) {
       const clicked = this.mousePressed && this.buttons.click(this.mousePressed);
       if (!clicked || this.storedMoveTime > 0) {
-        this.t += this.snailSpeed * deltaTime / 1000;
-        const v = Math.max(0, this.snailSpeed * this.groundSpeed * Math.sin(this.t * 16));
+        this.t += this.state.snailSpeed * deltaTime / 1000;
+        let dx = Math.max(0, this.state.snailSpeed * this.groundSpeed * Math.sin(this.t * 16));
+        //let v = Math.max(0, this.state.snailSpeed * this.groundSpeed * Math.sin(this.t * 16));
+        //if (this.state.snailSpeed > 3) {
+      //    v = this.state.snailSpeed * this.groundSpeed * deltaTime * 1000 * 60;
+        //}
+        let v = this.state.snailSpeed * deltaTime / 1000;
+
+        //const v = Math.max(0, this.groundSpeed * Math.sin(this.t * 16));
         this.addCoins(v, 0);
-        this.addCoins(v, 1);
-        this.addCoins(v, 2);
-        this.xpos += v;
+        if (this.state.showHills) {
+          this.addCoins(v, 1);
+        }
+        if (this.state.showMountains) {
+          this.addCoins(v, 2);
+        }
+        this.xpos += dx;
         this.storedMoveTime -= deltaTime;
       }
     }
@@ -275,5 +362,26 @@ class Walk {
   feed(val) {
     //this.state.coins += val;
     this.storedMoveTime += 5000;
+  }
+  getUpgradeCost(type) {
+    const nextUpgradeLevel = this.state.upgrades[type];
+    const upgradeCost = this.upgrades[type].cost[nextUpgradeLevel];
+    if (upgradeCost === undefined) {return Infinity;}
+    return upgradeCost;
+  }
+  buyUpgrade(type) {
+    const nextUpgradeLevel = this.state.upgrades[type];
+    const upgradeCost = this.getUpgradeCost(type);
+      if (this.state.coins >= upgradeCost) {
+      this.state.coins -= upgradeCost;
+      this.state.upgrades[type]++;
+      if (type === 'child') {
+        this.child.enable();
+      } else {
+        const newVal = this.upgrades[type].value[nextUpgradeLevel];
+        this.state[type] = newVal;
+      }
+
+    }
   }
 }

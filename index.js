@@ -24,6 +24,10 @@ const app = {
     app.tick();
     setInterval(app.save, 30000);
   },
+  reset: function() {
+    localStorage.removeItem('snailGame');
+    location.reload();
+  },
   load: function() {
     const loadedState = JSON.parse(localStorage.getItem('snailGame'));
 

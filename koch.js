@@ -13,9 +13,10 @@ class Koch {
     this.canvas.onmousemove = (e) => this.onmousemove.call(this, e);
 
     this.state = {};
+    this.state.enabled = false;
     this.t = 0;
     this.snailSpeed = 1;
-    this.setLevel(2);
+    this.setLevel(0);
     this.loopTime = 5;
     this.lastDrawEdges = 0;
 
@@ -48,6 +49,9 @@ class Koch {
 
     this.setHoverColors();
   }
+  enable() {
+    this.state.enabled = true;
+  }
   setRelations(parent, child) {
     this.parent = parent;
     this.child = child;
@@ -70,6 +74,11 @@ class Koch {
     this.mousePos = e;
   }
   draw(timestamp, deltaTime) {
+    if (!this.state.enabled) {
+      this.canvas.style.display = 'none';
+      return;
+    }
+    this.canvas.style.display = 'inline';
     const ctx = this.ctx;
 
     ctx.save();
@@ -148,7 +157,7 @@ class Koch {
 
   }
   update(timestamp, deltaTime) {
-
+    if (!this.state.enabled) {return;}
     this.hovering = undefined;
     const hovered = this.buttons.hover(this.mousePos);
 
