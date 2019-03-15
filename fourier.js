@@ -6,6 +6,8 @@ class Fourier {
     this.ctx = this.canvas.getContext('2d');
     this.canvas.style.display = 'inline';
     this.state = {};
+    this.state.enabled = false;
+
     this.angle = 0;
     this.snailSpeed = 1;
     this.setLevel(4);
@@ -13,7 +15,7 @@ class Fourier {
     this.lastDrawEdges = 0;
     this.drawLimit = 5;
 
-    this.storedMoveTime = this.loopTime * 1000;
+    this.storedMoveTime = 0; //this.loopTime * 1000;
     this.earnFactor = 1;
     this.maxStoredTime = this.loopTime * 1000;
     this.drawEnable = false;
@@ -33,6 +35,9 @@ class Fourier {
 
     this.buttons.add(0, 0, 100, 30, 'hello', () => {console.log('fourier button');});
 
+  }
+  enable() {
+    this.state.enabled = true;
   }
   setRelations(parent, child) {
     this.parent = parent;
@@ -56,6 +61,11 @@ class Fourier {
     this.mousePos = e;
   }
   draw(timestamp, deltaTime) {
+    if (!this.state.enabled) {
+      this.canvas.style.display = 'none';
+      return;
+    }
+    this.canvas.style.display = 'inline';
     if (!this.drawEnable) {return;}
     const ctx = this.ctx;
 
@@ -114,6 +124,7 @@ class Fourier {
     this.buttons.draw(this.mousePos);
   }
   update(timestamp, deltaTime) {
+    if (!this.state.enabled) {return;}
     const hovered = this.buttons.hover(this.mousePos);
 
     if (this.mousePos.clientX !== this.lastMousePos.clientX || this.mousePos.clientY !== this.lastMousePos.clientY) {

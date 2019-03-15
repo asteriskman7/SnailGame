@@ -6,13 +6,15 @@ class Hilbert {
     this.ctx = this.canvas.getContext('2d');
     this.canvas.style.display = 'inline';
     this.state = {};
+    this.state.enabled = false;
+
     this.t = 0;
     this.snailSpeed = 1;
     this.setLevel(0);
     this.loopTime = 5;
     this.lastDrawEdges = 0;
 
-    this.storedMoveTime = this.loopTime * 1000;
+    this.storedMoveTime = 0; //this.loopTime * 1000;
     this.lastKey = undefined;
     this.keyTime = 200;
     this.maxStoredTime = this.loopTime * 1000;
@@ -26,6 +28,9 @@ class Hilbert {
 
     this.buttons = new Buttons(this.canvas);
     this.buttons.add(0, 0, 100, 30, 'hello', () => {console.log('hilbert button');});
+  }
+  enable() {
+    this.state.enabled = true;
   }
   setRelations(parent, child) {
     this.parent = parent;
@@ -50,6 +55,11 @@ class Hilbert {
     this.mousePos = e;
   }
   draw(timestamp, deltaTime) {
+    if (!this.state.enabled) {
+      this.canvas.style.display = 'none';
+      return;
+    }
+    this.canvas.style.display = 'inline';
     const ctx = this.ctx;
 
     ctx.save();
@@ -128,6 +138,7 @@ class Hilbert {
     this.buttons.draw(this.mousePos);
   }
   update(timestamp, deltaTime) {
+    if (!this.state.enabeld) {return;}
 
     const hovered = this.buttons.hover(this.mousePos);
 
