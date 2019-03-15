@@ -1,15 +1,5 @@
 'use strict';
 
-/*
-Upgrades:
-enable hills
-enable mountains
-increase coin value
-increase coin rate
-increase snail speed
-enable koch
-*/
-
 class Walk {
   constructor(canvas, snailImage, coinImage) {
     this.canvas = canvas;
@@ -52,6 +42,7 @@ class Walk {
     this.xperSecond = this.snailGrowRate * this.snailImage.width * 0.5;
     this.xpos = 0;
     this.coins = [];
+    this.coinTime = 0;
 
     this.storedMoveTime = 2000000;
 
@@ -62,38 +53,36 @@ class Walk {
       strokecolor: 'black'
     });
 
-    this.buttons.add(0, 0, 100, 30, 'Speed', () => {this.buyUpgrade('snailSpeed');});
-    this.buttons.add(100, 0, 100, 30, 'Rate', () => {this.buyUpgrade('coinRate');});
-    this.buttons.add(200, 0, 100, 30, 'Value', () => {this.buyUpgrade('coinValue');});
-    this.buttons.add(300, 0, 100, 30, 'Hills', () => {this.buyUpgrade('showHills');});
-    this.buttons.add(400, 0, 100, 30, 'Mtns', () => {this.buyUpgrade('showMountains');});
-
-    this.buttons.add(this.canvas.width - 100, 0, 100, 30, 'Koch', () => {this.buyUpgrade('child');});
-
     this.upgrades = {
       snailSpeed: {
         value: [1.0,1.5], //max shouldn't be higher than 10
-        cost:  [10,50]
+        cost:  [10,50],
+        button: this.buttons.add(0, 0, 100, 30, 'Speed', () => {this.buyUpgrade('snailSpeed');})
       },
       showHills: {
         value: [true],
-        cost: [100]
+        cost: [100],
+        button: this.buttons.add(300, 0, 100, 30, 'Hills', () => {this.buyUpgrade('showHills');})
       },
       showMountains: {
         value: [true],
-        cost: [1000]
+        cost: [1000],
+        button: this.buttons.add(400, 0, 100, 30, 'Mtns', () => {this.buyUpgrade('showMountains');})
       },
       coinRate: {
         value: [2,4,8],
-        cost: [15,100,200]
+        cost: [15,100,200],
+        button: this.buttons.add(100, 0, 100, 30, 'Rate', () => {this.buyUpgrade('coinRate');})
       },
       coinValue: {
         value: [3, 6],
-        cost: [2000, 3000]
+        cost: [2000, 3000],
+        button: this.buttons.add(200, 0, 100, 30, 'Value', () => {this.buyUpgrade('coinValue');})
       },
       child: {
         value: [true],
-        cost: [5000]
+        cost: [5000],
+        button: this.buttons.add(this.canvas.width - 100, 0, 100, 30, 'Koch', () => {this.buyUpgrade('child');})
       }
     }
   }
@@ -256,18 +245,17 @@ class Walk {
     ctx.fillStyle = '#3998af';
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
-  addCoins(v, z) {
-    const coinScore = v * Math.random();
+  addCoins(count, z) {
+    //const coinScore = v * Math.random();
 
+    //const maxValue = this.state.snailSpeed <= 0.5 ? 0.5/60 :  (this.state.snailSpeed * (7/9) + 2/9) / 60;
 
-    const maxValue = this.state.snailSpeed <= 0.5 ? 0.5/60 :  (this.state.snailSpeed * (7/9) + 2/9) / 60;
-
-    if (coinScore > maxValue * this.state.coinRate) {
+    //if (coinScore > maxValue * this.state.coinRate) {
       //grass coins are value * 1
       //hill coins are  value * 10
       //mount coins are value * 100
-      this.coins.push({x: this.xpos, z: z, val: this.state.coinValue * Math.pow(10, z)});
-    }
+      this.coins.push({x: this.xpos, z: z, val: count * this.state.coinValue * Math.pow(10, z)});
+    //}
   }
   drawCoins(z) {
     const speed = [1, 0.3, 0.1][z];
@@ -340,27 +328,34 @@ class Walk {
       if (!clicked || this.storedMoveTime > 0) {
         this.t += this.state.snailSpeed * deltaTime / 1000;
         let dx = Math.max(0, this.state.snailSpeed * this.groundSpeed * Math.sin(this.t * 16));
-        //let v = Math.max(0, this.state.snailSpeed * this.groundSpeed * Math.sin(this.t * 16));
-        //if (this.state.snailSpeed > 3) {
-      //    v = this.state.snailSpeed * this.groundSpeed * deltaTime * 1000 * 60;
-        //}
-        let v = this.state.snailSpeed * deltaTime / 1000;
 
-        //const v = Math.max(0, this.groundSpeed * Math.sin(this.t * 16));
-        this.addCoins(v, 0);
-        if (this.state.showHills) {
-          this.addCoins(v, 1);
-        }
-        if (this.state.showMountains) {
-          this.addCoins(v, 2);
+        let v = this.state.snailSpeed * deltaTime / 1000;
+        this.coinTime += this.state.snailSpeed * deltaTime;
+        let coinsToAdd = Math.floor(this.coinTime / (1000 * this.state.coinRate));
+
+        this.coinTime -= coinsToAdd * this.state.coinRate * 1000;
+
+        if (coinsToAdd > 0) {
+          this.addCoins(coinsToAdd, 0);
+          if (this.state.showHills) {
+            this.addCoins(coinsToAdd, 1);
+          }
+          if (this.state.showMountains) {
+            this.addCoins(coinsToAdd, 2);
+          }
         }
         this.xpos += dx;
         this.storedMoveTime -= deltaTime;
       }
     }
+
+    for (let upgradeType in this.upgrades) {
+      const cost = this.getUpgradeCost(upgradeType);
+      const percent = Math.min(1, this.state.coins / cost);
+      this.upgrades[upgradeType].button.options.percent = percent;
+    }
   }
   feed(val) {
-    //this.state.coins += val;
     this.storedMoveTime += 5000;
   }
   getUpgradeCost(type) {
