@@ -14,25 +14,35 @@ class Koch {
 
     this.state = {};
     this.state.enabled = false;
+    this.state.coins = 0;
+    this.state.coinValue = 1;
+    this.state.level = 0;
+    this.state.snailSpeed = 1;
+    this.state.hoverRatio = 2;
+    this.state.upgrades = {
+      level: 0,
+      snailSpeed: 0,
+      hoverRatio: 0,
+      coinValue: 0,
+      child: 0
+    };
+
     this.t = 0;
-    this.snailSpeed = 1;
-    this.setLevel(0);
+    this.setLevel(this.state.level);
     this.loopTime = 5;
     this.lastDrawEdges = 0;
 
     this.hoverTarget = 0;
     this.hoverRemaining = this.loopTime * 1000 / 6;
     this.storedMoveTime = 0;
-    this.hoverRatio = 2;
 
     this.buttons = new Buttons(this.canvas, {
-      font: '10 Courier',
+      font: '20px Courier',
       fgcolor: 'red',
       bgcolor: 'grey',
-      strokecolor: 'black'
-    });
+      strokecolor: 'black',
 
-    this.buttons.add(canvas.width - 100, 0, 100, 30, 'hello', () => {console.log('button pressed');});
+    });
 
     const hoverButtonOptions = {
       shape: 'circle',
@@ -46,6 +56,34 @@ class Koch {
     this.hoverButtons.push(this.buttons.add(canvas.width * 0.1, canvas.height * 0.27, 50, 50, '1', () => {this.hoverButton(0);}, hoverButtonOptions));
     this.hoverButtons.push(this.buttons.add(canvas.width * 0.9, canvas.height * 0.27, 50, 50, '2', () => {this.hoverButton(1);}, hoverButtonOptions));
     this.hoverButtons.push(this.buttons.add(canvas.width * 0.5, canvas.height * 0.9,  50, 50, '3', () => {this.hoverButton(2);}, hoverButtonOptions));
+
+    this.upgrades = {
+      level: {
+        value: [1, 2, 3],
+        cost: [30, 600, 9000],
+        button: this.buttons.add(0, 0, 100, 30, 'Level', () => {this.buyUpgrade('level');})
+      },
+      snailSpeed: {
+        value: [3, 9, 27],
+        cost: [150, 3000, 45000],
+        button: this.buttons.add(100, 0, 100, 30, 'Speed', () => {this.buyUpgrade('snailSpeed');})
+      },
+      hoverRatio: {
+        value: [10, 100, 1000],
+        cost: [10, 1000, 1000000],
+        button: this.buttons.add(200, 0, 100, 30, 'Hover', () => {this.buyUpgrade('hoverRatio');})
+      },
+      coinValue: {
+        value: [5, 25, 125],
+        cost: [5, 500, 500000],
+        button: this.buttons.add(300, 0, 100, 30, 'Value', () => {this.buyUpgrade('coinValue');})
+      },
+      child: {
+        value: [true],
+        cost: [10000000],
+        button: this.buttons.add(this.canvas.width - 100, 0, 100, 30, 'Hilbert', () => {this.buyUpgrade('child');})
+      }
+    };
 
     this.setHoverColors();
   }
@@ -63,6 +101,7 @@ class Koch {
     const loadedState = JSON.parse(str);
     //let anything from loadedState override current state
     this.state = {...this.state,...loadedState};
+    this.setLevel(this.state.level);
   }
   onmousedown(e) {
     this.mousePressed = e;
@@ -101,6 +140,7 @@ class Koch {
     const drawEdges = this.edgeCount * f;
     if (Math.floor(drawEdges) !== this.lastDrawEdges) {
       this.parent.feed(1);
+      this.state.coins += this.state.coinValue;
     }
     this.lastDrawEdges = Math.floor(drawEdges);
 
@@ -163,13 +203,13 @@ class Koch {
 
     if (this.storedMoveTime > 0) {
       const stepTime = Math.min(deltaTime, this.storedMoveTime);
-      this.t += this.snailSpeed * stepTime / 1000;
+      this.t += this.state.snailSpeed * stepTime / 1000;
       this.storedMoveTime -= stepTime;
     }
     if (this.hovering !== undefined) {
       if (this.hovering === this.hoverTarget) {
         this.hoverRemaining -= deltaTime;
-        this.storedMoveTime += deltaTime * this.hoverRatio;
+        this.storedMoveTime += deltaTime * this.state.hoverRatio;
       }
 
       if (this.hoverRemaining <= 0) {
@@ -185,6 +225,12 @@ class Koch {
       if (!clicked) {
 
       }
+    }
+
+    for (let upgradeType in this.upgrades) {
+      const cost = this.getUpgradeCost(upgradeType);
+      const percent = Math.min(1, this.state.coins / cost);
+      this.upgrades[upgradeType].button.options.percent = percent;
     }
 
   }
@@ -226,5 +272,29 @@ class Koch {
     this.cmds = cmd;
     this.edgeCount = edgeCount;
     this.level = n;
+  }
+  getUpgradeCost(type) {
+    const nextUpgradeLevel = this.state.upgrades[type];
+    const upgradeCost = this.upgrades[type].cost[nextUpgradeLevel];
+    if (upgradeCost === undefined) {return Infinity;}
+    return upgradeCost;
+  }
+  buyUpgrade(type) {
+    const nextUpgradeLevel = this.state.upgrades[type];
+    const upgradeCost = this.getUpgradeCost(type);
+      if (this.state.coins >= upgradeCost) {
+      this.state.coins -= upgradeCost;
+      this.state.upgrades[type]++;
+      if (type === 'child') {
+        this.child.enable();
+      } else {
+        const newVal = this.upgrades[type].value[nextUpgradeLevel];
+        this.state[type] = newVal;
+        if (type === 'level') {
+          this.setLevel(newVal);
+        }
+      }
+
+    }
   }
 }
