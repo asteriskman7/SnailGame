@@ -13,6 +13,8 @@ class Buttons {
       strokecolor: 'red',
       hover: false,
       shape: 'rect',
+      percent: undefined,
+      percentcolor: 'yellow',
       ...options};
   }
   add(x, y, w, h, text, callback, options) {
@@ -109,6 +111,10 @@ class Buttons {
           ctx.fillRect(v.shape.x1, v.shape.y1, v.shape.w, v.shape.h);
           textx = v.shape.x1 + v.shape.w * 0.5;
           texty = v.shape.y1 + v.shape.h * 0.5;
+          ctx.fillStyle = options.percentcolor;
+          if (options.percent) {
+            ctx.fillRect(v.shape.x1, v.shape.y1, v.shape.w * options.percent, v.shape.h);
+          }
           break;
         case 'circle':
           ctx.beginPath();
