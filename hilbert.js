@@ -43,7 +43,6 @@ class Hilbert {
       bgcolor: 'grey',
       strokecolor: 'black'
     });
-    this.buttons.add(0, 0, 100, 30, 'hello', () => {console.log('hilbert button');});
 
     this.upgrades = {
       level: {
