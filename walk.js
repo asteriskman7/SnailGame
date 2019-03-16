@@ -44,7 +44,7 @@ class Walk {
     this.coins = [];
     this.coinTime = 0;
 
-    this.storedMoveTime = 2000000;
+    this.storedMoveTime = 2000;
 
     this.buttons = new Buttons(this.canvas, {
       font: '20px Courier',
