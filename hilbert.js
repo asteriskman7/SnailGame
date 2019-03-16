@@ -7,16 +7,27 @@ class Hilbert {
     this.canvas.style.display = 'inline';
     this.state = {};
     this.state.enabled = false;
+    this.state.coins = 0;
+    this.state.coinValue = 1;
+    this.state.level = 0;
+    this.state.snailSpeed = 1;
+    this.state.keyTime = 200;
+    this.state.upgrades = {
+      level: 0,
+      snailSpeed: 0,
+      keyTime: 0,
+      coinValue: 0,
+      child: 0
+    };
 
     this.t = 0;
-    this.snailSpeed = 1;
-    this.setLevel(0);
+
+    this.setLevel(this.state.level);
     this.loopTime = 5;
     this.lastDrawEdges = 0;
 
     this.storedMoveTime = 0; //this.loopTime * 1000;
     this.lastKey = undefined;
-    this.keyTime = 200;
     this.maxStoredTime = this.loopTime * 1000;
 
     this.mousePressed = undefined;
@@ -26,8 +37,41 @@ class Hilbert {
     this.canvas.onmousemove = (e) => this.onmousemove.call(this, e);
     this.canvas.onkeypress = (e) => this.onkeypress.call(this, e);
 
-    this.buttons = new Buttons(this.canvas);
+    this.buttons = new Buttons(this.canvas, {
+      font: '20px Courier',
+      fgcolor: 'red',
+      bgcolor: 'grey',
+      strokecolor: 'black'
+    });
     this.buttons.add(0, 0, 100, 30, 'hello', () => {console.log('hilbert button');});
+
+    this.upgrades = {
+      level: {
+        value: [1, 2, 3],
+        cost: [40, 800, 12000],
+        button: this.buttons.add(0, 0, 100, 30, 'Level', () => {this.buyUpgrade('level');})
+      },
+      snailSpeed: {
+        value: [4, 16, 64],
+        cost: [200, 8000, 320000],
+        button: this.buttons.add(100, 0, 100, 30, 'Speed', () => {this.buyUpgrade('snailSpeed');})
+      },
+      keyTime: {
+        value: [200, 1000, 5000],
+        cost: [10, 10000, 10000000],
+        button: this.buttons.add(200, 0, 100, 30, 'DPK', () => {this.buyUpgrade('keyTime');})
+      },
+      coinValue: {
+        value: [6, 36, 216],
+        cost: [6, 600, 600000],
+        button: this.buttons.add(300, 0, 100, 30, 'Value', () => {this.buyUpgrade('coinValue');})
+      },
+      child: {
+        value: [true],
+        cost: [20000000],
+        button: this.buttons.add(this.canvas.width - 100, 0, 100, 30, 'Fourier', () => {this.buyUpgrade('child');})
+      }
+    };
   }
   enable() {
     this.state.enabled = true;
@@ -43,10 +87,11 @@ class Hilbert {
     const loadedState = JSON.parse(str);
     //let anything from loadedState override current state
     this.state = {...this.state,...loadedState};
+    this.setLevel(this.state.level);
   }
   onmousedown(e) {
     this.mousePressed = e;
-    this.storedMoveTime += this.keyTime;
+    this.storedMoveTime += this.state.keyTime;
   }
   onmouseup(e) {
     this.mousePressed = undefined;
@@ -83,6 +128,7 @@ class Hilbert {
     const f = (this.t % this.loopTime) / this.loopTime;
     const drawEdges = this.edgeCount * f;
     if (Math.floor(drawEdges) !== this.lastDrawEdges) {
+      this.state.coins += this.state.coinValue;
       this.parent.feed(1);
     }
     this.lastDrawEdges = Math.floor(drawEdges);
@@ -138,18 +184,24 @@ class Hilbert {
     this.buttons.draw(this.mousePos);
   }
   update(timestamp, deltaTime) {
-    if (!this.state.enabeld) {return;}
+    if (!this.state.enabled) {return;}
 
     const hovered = this.buttons.hover(this.mousePos);
 
     if (this.storedMoveTime > 0) {
       const stepTime = Math.min(deltaTime, this.storedMoveTime);
-      this.t += this.snailSpeed * stepTime / 1000;
+      this.t += this.state.snailSpeed * stepTime / 1000;
       this.storedMoveTime -= stepTime;
     }
 
     if (this.mousePressed !== undefined) {
       const clicked = this.buttons.click(this.mousePressed);
+    }
+
+    for (let upgradeType in this.upgrades) {
+      const cost = this.getUpgradeCost(upgradeType);
+      const percent = Math.min(1, this.state.coins / cost);
+      this.upgrades[upgradeType].button.options.percent = percent;
     }
 
   }
@@ -195,8 +247,32 @@ class Hilbert {
   onkeypress(event) {
     const key = event.key;
     if (key !== this.lastKey) {
-      this.storedMoveTime += this.keyTime;
+      this.storedMoveTime += this.state.keyTime;
       this.lastKey = key;
+    }
+  }
+  getUpgradeCost(type) {
+    const nextUpgradeLevel = this.state.upgrades[type];
+    const upgradeCost = this.upgrades[type].cost[nextUpgradeLevel];
+    if (upgradeCost === undefined) {return Infinity;}
+    return upgradeCost;
+  }
+  buyUpgrade(type) {
+    const nextUpgradeLevel = this.state.upgrades[type];
+    const upgradeCost = this.getUpgradeCost(type);
+      if (this.state.coins >= upgradeCost) {
+      this.state.coins -= upgradeCost;
+      this.state.upgrades[type]++;
+      if (type === 'child') {
+        this.child.enable();
+      } else {
+        const newVal = this.upgrades[type].value[nextUpgradeLevel];
+        this.state[type] = newVal;
+        if (type === 'level') {
+          this.setLevel(newVal);
+        }
+      }
+
     }
   }
 }
