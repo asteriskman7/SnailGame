@@ -7,22 +7,28 @@ class Fourier {
     this.canvas.style.display = 'inline';
     this.state = {};
     this.state.enabled = false;
+    this.state.coins = 0;
+    this.state.coinValue = 1;
+    this.state.level = 0;
+    this.state.earnFactor = 1;
+    this.state.upgrades = {
+      level: 0,
+      coinValue: 0,
+      earnFactor: 0
+    }
 
     this.angle = 0;
     this.snailSpeed = 1;
-    this.setLevel(4);
+    this.setLevel(this.state.level);
     this.loopTime = 5;
     this.lastDrawEdges = 0;
     this.drawLimit = 5;
 
     this.storedMoveTime = 0; //this.loopTime * 1000;
-    this.earnFactor = 1;
     this.maxStoredTime = this.loopTime * 1000;
     this.drawEnable = false;
     this.lastMousePos = {clientX: -100, clientY: -100};
     this.mousePos = this.lastMousePos;
-
-
 
     this.mousePressed = undefined;
     //this.mousePos = undefined;
@@ -31,9 +37,30 @@ class Fourier {
     this.canvas.onmousemove = (e) => this.onmousemove.call(this, e);
     //this.canvas.onkeypress = (e) => this.onkeypress.call(this, e);
 
-    this.buttons = new Buttons(this.canvas);
+    this.buttons = new Buttons(this.canvas, {
+      font: '20px Courier',
+      fgcolor: 'red',
+      bgcolor: 'grey',
+      strokecolor: 'black'
+    });
 
-    this.buttons.add(0, 0, 100, 30, 'hello', () => {console.log('fourier button');});
+    this.upgrades = {
+      level: {
+        value: [1, 2, 3],
+        cost: [100, 10000, 1000000],
+        button: this.buttons.add(0, 0, 100, 30, 'Level', () => {this.buyUpgrade('level');})
+      },
+      coinValue: {
+        value: [8, 64, 512],
+        cost: [8, 800, 800000],
+        button: this.buttons.add(100, 0, 100, 30, 'Value', () => {this.buyUpgrade('value');})
+      },
+      earnFactor: {
+        value: [2, 200, 20000],
+        cost: [1000, 20000, 300000],
+        button: this.buttons.add(200, 0, 100, 30, 'APS', () => {this.buyUpgrade('earnFactor');})
+      }
+    };
 
   }
   enable() {
@@ -50,6 +77,7 @@ class Fourier {
     const loadedState = JSON.parse(str);
     //let anything from loadedState override current state
     this.state = {...this.state,...loadedState};
+    this.setLevel(this.state.level);
   }
   onmousedown(e) {
     this.mousePressed = e;
@@ -66,60 +94,62 @@ class Fourier {
       return;
     }
     this.canvas.style.display = 'inline';
-    if (!this.drawEnable) {return;}
-    const ctx = this.ctx;
+    if (this.drawEnable) {
+      const ctx = this.ctx;
 
-    ctx.save();
+      ctx.save();
 
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    //ctx.fillStyle = 'red';
-    //ctx.font = '30 Courier';
-    //ctx.fillText('Fourier', 10, 10);
-    ctx.translate(this.canvas.width * 0.5, this.canvas.height * 0.5);
+      ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      //ctx.fillStyle = 'red';
+      //ctx.font = '30 Courier';
+      //ctx.fillText('Fourier', 10, 10);
+      ctx.translate(this.canvas.width * 0.5, this.canvas.height * 0.5);
 
-    //let cx = this.canvas.width * 0.5;
-    //let cy = this.canvas.height * 0.5;
-    let cx = 0;
-    let cy = 0;
+      //let cx = this.canvas.width * 0.5;
+      //let cy = this.canvas.height * 0.5;
+      let cx = 0;
+      let cy = 0;
 
-    ctx.fillStyle = 'green';
-    ctx.strokeStyle = 'RGBA(255,255,255,0.3)';
+      ctx.fillStyle = 'green';
+      ctx.strokeStyle = 'RGBA(255,255,255,0.3)';
 
-    this.units.forEach( (unit, i) => {
-      //if (i === 0) {return;}
-      const angle = unit.freq * this.angle;
-      const dx = unit.mag * Math.cos(angle + unit.phase);
-      const dy = unit.mag * Math.sin(angle + unit.phase);
-      if (unit.mag > this.drawLimit) {
-        ctx.beginPath();
-        ctx.arc(cx, cy, unit.mag, 0, Math.PI * 2);
-        ctx.stroke();
+      this.units.forEach( (unit, i) => {
+        //if (i === 0) {return;}
+        const angle = unit.freq * this.angle;
+        const dx = unit.mag * Math.cos(angle + unit.phase);
+        const dy = unit.mag * Math.sin(angle + unit.phase);
+        if (unit.mag > this.drawLimit) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, unit.mag, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+        cx += dx;
+        cy += dy;
+        if (unit.mag > this.drawLimit) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      if (this.points.length >= this.units.length) {
+        this.points = [];
+        this.parent.feed(1);
+        this.state.coins += this.state.coinValue;
       }
-      cx += dx;
-      cy += dy;
-      if (unit.mag > this.drawLimit) {
-        ctx.beginPath();
-        ctx.arc(cx, cy, 3, 0, Math.PI * 2);
-        ctx.fill();
+      this.points.push({x: cx, y: cy});
+
+      ctx.strokeStyle = 'grey';
+      ctx.beginPath();
+      const points = this.points;
+      ctx.moveTo(points[0].x, points[0].y);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(points[i].x, points[i].y);
       }
-    });
+      ctx.stroke();
 
-    if (this.points.length >= this.units.length) {
-      this.points = [];
-      this.parent.feed(1);
+      ctx.restore();
     }
-    this.points.push({x: cx, y: cy});
-
-    ctx.strokeStyle = 'grey';
-    ctx.beginPath();
-    const points = this.points;
-    ctx.moveTo(points[0].x, points[0].y);
-    for (let i = 1; i < points.length; i++) {
-      ctx.lineTo(points[i].x, points[i].y);
-    }
-    ctx.stroke();
-
-    ctx.restore();
 
     this.buttons.draw(this.mousePos);
   }
@@ -128,7 +158,7 @@ class Fourier {
     const hovered = this.buttons.hover(this.mousePos);
 
     if (this.mousePos.clientX !== this.lastMousePos.clientX || this.mousePos.clientY !== this.lastMousePos.clientY) {
-      this.storedMoveTime += this.earnFactor * deltaTime;
+      this.storedMoveTime += this.state.earnFactor * deltaTime;
     }
     this.storedMoveTime = Math.min(this.maxStoredTime, this.storedMoveTime);
     this.lastMousePos = this.mousePos;
@@ -143,6 +173,12 @@ class Fourier {
 
     if (this.mousePressed !== undefined) {
       const clicked = this.buttons.click(this.mousePressed);
+    }
+
+    for (let upgradeType in this.upgrades) {
+      const cost = this.getUpgradeCost(upgradeType);
+      const percent = Math.min(1, this.state.coins / cost);
+      this.upgrades[upgradeType].button.options.percent = percent;
     }
 
   }
@@ -188,6 +224,7 @@ class Fourier {
 
     this.units = this.dft(reducedPoints);
     this.points = [];
+    this.angle = 0;
   }
   dft(data) {
     let X = [];
@@ -211,5 +248,29 @@ class Fourier {
     });
 
     return X;
+  }
+  getUpgradeCost(type) {
+    const nextUpgradeLevel = this.state.upgrades[type];
+    const upgradeCost = this.upgrades[type].cost[nextUpgradeLevel];
+    if (upgradeCost === undefined) {return Infinity;}
+    return upgradeCost;
+  }
+  buyUpgrade(type) {
+    const nextUpgradeLevel = this.state.upgrades[type];
+    const upgradeCost = this.getUpgradeCost(type);
+      if (this.state.coins >= upgradeCost) {
+      this.state.coins -= upgradeCost;
+      this.state.upgrades[type]++;
+      if (type === 'child') {
+        this.child.enable();
+      } else {
+        const newVal = this.upgrades[type].value[nextUpgradeLevel];
+        this.state[type] = newVal;
+        if (type === 'level') {
+          this.setLevel(newVal);
+        }
+      }
+
+    }
   }
 }
