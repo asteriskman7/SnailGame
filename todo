@@ -1,5 +1,9 @@
-only click once per mouse press
-walk needs to try images instead of drawing grass and maybe hills/mtns
-add upgrades for levels
-add UI for levels
-add manual control for levels past walk
+add asteriskCoin request at beginning
+add snail images to koch, hilbert, fourier
+allow lower levels to send coins to higher levels
+should coin value modify feed value?
+if stored move time becomes too large should it convert into increased coin value?
+when no more upgrades remain, hide button
+tune upgrades
+make prestige dialog more beautiful
+fix walk rate upgrades, they get worse per upgrade?

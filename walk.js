@@ -11,6 +11,8 @@ class Walk {
     this.canvas.onmousedown = (e) => this.onmousedown.call(this, e);
     this.canvas.onmouseup = (e) => this.onmouseup.call(this, e);
     this.canvas.onmousemove = (e) => this.onmousemove.call(this, e);
+    this.canvas.ontouchstart = (e) => this.ontouchstart.call(this, e);
+    this.canvas.ontouchend = (e) => this.ontouchend.call(this, e);
 
     this.snailImage = snailImage;
     this.coinImage = coinImage;
@@ -81,10 +83,12 @@ class Walk {
       },
       child: {
         value: [true],
-        cost: [5000],
+        cost: [5],
         button: this.buttons.add(this.canvas.width - 100, 0, 100, 30, 'Koch', () => {this.buyUpgrade('child');})
       }
-    }
+    };
+
+    this.buttons.add(this.canvas.width - 200, 0, 100, 30, 'Prestige', () => {this.showPrestige();});
   }
   setRelations(parent, child) {
     this.parent = parent;
@@ -98,6 +102,7 @@ class Walk {
     for (let key in loadedState) {
       this.state[key] = loadedState[key];
     }
+    this.state.coins = 10;
   }
   onmousedown(e) {
     this.mousePressed = e;
@@ -107,6 +112,15 @@ class Walk {
   }
   onmousemove(e) {
     this.mousePos = e;
+  }
+  ontouchstart(e) {
+    const newE = {};
+    newE.clientX = event.changedTouches[0].pageX - window.scrollX;
+    newE.clientY = event.changedTouches[0].pageY - window.scrollY;
+    this.mousePressed = newE;
+  }
+  ontouchend(e) {
+    this.mousePressed = undefined;
   }
   getTimeString(t) {
     let [h,m] = t.toLocaleTimeString().split` `[0].split`:`;
@@ -367,7 +381,7 @@ class Walk {
   buyUpgrade(type) {
     const nextUpgradeLevel = this.state.upgrades[type];
     const upgradeCost = this.getUpgradeCost(type);
-      if (this.state.coins >= upgradeCost) {
+    if (this.state.coins >= upgradeCost) {
       this.state.coins -= upgradeCost;
       this.state.upgrades[type]++;
       if (type === 'child') {
@@ -378,5 +392,10 @@ class Walk {
       }
 
     }
+  }
+  showPrestige() {
+    const e = document.getElementById('divPrestige');
+    e.style.display = 'block';
+
   }
 }

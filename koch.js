@@ -11,6 +11,8 @@ class Koch {
     this.canvas.onmousedown = (e) => this.onmousedown.call(this, e);
     this.canvas.onmouseup = (e) => this.onmouseup.call(this, e);
     this.canvas.onmousemove = (e) => this.onmousemove.call(this, e);
+    this.canvas.ontouchstart = (e) => this.ontouchstart.call(this, e);
+    this.canvas.ontouchend = (e) => this.ontouchend.call(this, e);
 
     this.state = {};
     this.state.enabled = false;
@@ -80,7 +82,7 @@ class Koch {
       },
       child: {
         value: [true],
-        cost: [10000000],
+        cost: [10],
         button: this.buttons.add(this.canvas.width - 100, 0, 100, 30, 'Hilbert', () => {this.buyUpgrade('child');})
       }
     };
@@ -111,6 +113,18 @@ class Koch {
   }
   onmousemove(e) {
     this.mousePos = e;
+  }
+  ontouchstart(e) {
+    //e.preventDefault();
+    const newE = {};
+    newE.clientX = event.changedTouches[0].pageX - window.scrollX;
+    newE.clientY = event.changedTouches[0].pageY - window.scrollY;
+    this.mousePressed = newE;
+    this.mousePos = newE;
+  }
+  ontouchend(e) {
+    this.mousePressed = undefined;
+    this.mousePos = undefined;
   }
   draw(timestamp, deltaTime) {
     if (!this.state.enabled) {

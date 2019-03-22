@@ -15,7 +15,7 @@ class Fourier {
       level: 0,
       coinValue: 0,
       earnFactor: 0
-    }
+    };
 
     this.angle = 0;
     this.snailSpeed = 1;
@@ -35,7 +35,9 @@ class Fourier {
     this.canvas.onmousedown = (e) => this.onmousedown.call(this, e);
     this.canvas.onmouseup = (e) => this.onmouseup.call(this, e);
     this.canvas.onmousemove = (e) => this.onmousemove.call(this, e);
-    //this.canvas.onkeypress = (e) => this.onkeypress.call(this, e);
+    this.canvas.ontouchstart = (e) => this.ontouchstart.call(this, e);
+    this.canvas.ontouchend = (e) => this.ontouchend.call(this, e);
+    this.canvas.ontouchmove = (e) => this.ontouchmove.call(this, e);
 
     this.buttons = new Buttons(this.canvas, {
       font: '20px Courier',
@@ -52,8 +54,8 @@ class Fourier {
       },
       coinValue: {
         value: [8, 64, 512],
-        cost: [8, 800, 800000],
-        button: this.buttons.add(100, 0, 100, 30, 'Value', () => {this.buyUpgrade('value');})
+        cost: [2, 800, 800000],
+        button: this.buttons.add(100, 0, 100, 30, 'Value', () => {this.buyUpgrade('coinValue');})
       },
       earnFactor: {
         value: [2, 200, 20000],
@@ -86,6 +88,22 @@ class Fourier {
     this.mousePressed = undefined;
   }
   onmousemove(e) {
+    this.mousePos = e;
+  }
+  ontouchstart(e) {
+    e.preventDefault();
+    const newE = {};
+    newE.clientX = event.changedTouches[0].pageX - window.scrollX;
+    newE.clientY = event.changedTouches[0].pageY - window.scrollY;
+
+    this.mousePressed = newE;
+  }
+  ontouchend(e) {
+    this.mousePressed = undefined;
+  }
+  ontouchmove(e) {
+    e.clientX = event.changedTouches[0].pageX;
+    e.clientY = event.changedTouches[0].pageY;
     this.mousePos = e;
   }
   draw(timestamp, deltaTime) {
@@ -149,7 +167,10 @@ class Fourier {
       ctx.stroke();
 
       ctx.restore();
+
     }
+
+
 
     this.buttons.draw(this.mousePos);
   }
@@ -252,13 +273,14 @@ class Fourier {
   getUpgradeCost(type) {
     const nextUpgradeLevel = this.state.upgrades[type];
     const upgradeCost = this.upgrades[type].cost[nextUpgradeLevel];
+
     if (upgradeCost === undefined) {return Infinity;}
     return upgradeCost;
   }
   buyUpgrade(type) {
     const nextUpgradeLevel = this.state.upgrades[type];
     const upgradeCost = this.getUpgradeCost(type);
-      if (this.state.coins >= upgradeCost) {
+    if (this.state.coins >= upgradeCost) {
       this.state.coins -= upgradeCost;
       this.state.upgrades[type]++;
       if (type === 'child') {

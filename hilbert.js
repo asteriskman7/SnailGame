@@ -36,6 +36,8 @@ class Hilbert {
     this.canvas.onmouseup = (e) => this.onmouseup.call(this, e);
     this.canvas.onmousemove = (e) => this.onmousemove.call(this, e);
     this.canvas.onkeypress = (e) => this.onkeypress.call(this, e);
+    this.canvas.ontouchstart = (e) => this.ontouchstart.call(this, e);
+    this.canvas.ontouchend = (e) => this.ontouchend.call(this, e);
 
     this.buttons = new Buttons(this.canvas, {
       font: '20px Courier',
@@ -67,7 +69,7 @@ class Hilbert {
       },
       child: {
         value: [true],
-        cost: [20000000],
+        cost: [5],
         button: this.buttons.add(this.canvas.width - 100, 0, 100, 30, 'Fourier', () => {this.buyUpgrade('child');})
       }
     };
@@ -87,6 +89,7 @@ class Hilbert {
     //let anything from loadedState override current state
     this.state = {...this.state,...loadedState};
     this.setLevel(this.state.level);
+
   }
   onmousedown(e) {
     this.mousePressed = e;
@@ -97,6 +100,17 @@ class Hilbert {
   }
   onmousemove(e) {
     this.mousePos = e;
+  }
+  ontouchstart(e) {
+    e.preventDefault();
+    const newE = {};
+    newE.clientX = event.changedTouches[0].pageX - window.scrollX;
+    newE.clientY = event.changedTouches[0].pageY - window.scrollY;
+    this.mousePressed = newE;
+    this.storedMoveTime += this.state.keyTime;
+  }
+  ontouchend(e) {
+    this.mousePressed = undefined;
   }
   draw(timestamp, deltaTime) {
     if (!this.state.enabled) {
