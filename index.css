@@ -16,3 +16,53 @@ canvas {
 .imgHidden {
   display: none;
 }
+
+#divPrestige {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  width: 33em;
+  /*height: 16em;*/
+  padding: 1em;
+  padding-bottom: 2em;
+  background: white;
+  border: 2px solid black;
+  display: none;
+}
+
+#divPTitle {
+  text-align: center;
+  font-size: 4em;
+}
+
+#divPDesc {
+  font-size: 2em;
+  margin-top: 1em;
+}
+
+.spanBold {
+  font-weight: bold;
+  font-variant: small-caps;
+}
+
+#divPPrice {
+  font-size: 2em;
+  margin-top: 2em;
+}
+
+#divPWDesc {
+  font-size: 2em;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+}
+
+#inputAddress {
+  font-size: 2em;
+  width: 8em;
+}
+
+.pDialogButton {
+  font-size: 2em;
+}

@@ -5,6 +5,15 @@ const app = {
   init: function() {
     console.log('init');
 
+    app.state = {
+      prestigeCount: 0
+    };
+
+    document.getElementById('buttonPrestige').onclick = app.prestigeClick;
+    document.getElementById('buttonCancel').onclick = app.prestigeCancel;
+
+
+
     app.levelList = ['walk', 'koch', 'hilbert', 'fourier'];
     app.levels = {};
     app.levels.walk = new Walk(document.getElementById('cwalk'),
@@ -67,6 +76,22 @@ const app = {
     }
     app.prevTimestamp = timestamp;
     window.requestAnimationFrame(app.tick);
+  },
+  prestigeClick: function() {
+    const address = document.getElementById('inputAddress').value;
+    if (address === app.levels.fourier.msg) {
+      console.log('BIG P TIME');
+      app.prestige();
+      document.getElementById('divPrestige').style.display = 'none';
+    } else {
+      alert('ERROR: The asterisk_coin wallet associated with the address you entered does not contain at least 1000 asterisk_coin.');
+    }
+  },
+  prestigeCancel: function() {
+    document.getElementById('divPrestige').style.display = 'none';
+  },
+  prestige: function() {
+
   }
 };
 

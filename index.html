@@ -8,6 +8,23 @@
     <img id='imgWalkingSnail' class='imgHidden' src='./walkingSnail.png'>
     <img id='imgGrass' class='imgHidden' src='./grass.jpg'>
     <img id='imgCoin' class='imgHidden' src='./coin.png'>
+    <button type='button' onclick='app.reset()'>reset</button>
+    <div id='divPrestige'>
+      <div id='divPTitle'>Prestige Now!</div>
+      <hr>
+      <div id='divPDesc'>
+        Prestige now to <span class='spanBold'>double</span> the value of all currencies!
+      </div>
+      <div id='divPPrice'>
+        <span class='spanBold'>Prestige Cost:</span> 1000 asterisk_coin
+      </div>
+      <div id='divPWDesc'>
+        asterisk_coin Wallet Address:
+      </div>
+      <input id='inputAddress' type='password' value="********">
+      <button id='buttonPrestige' class='pDialogButton' type='button'>Prestige!</button>
+      <button id='buttonCancel' class='pDialogButton' type='button'>Cancel</button>
+    </div>
     <canvas id='cwalk' width='800' height='250'></canvas>
     <canvas id='ckoch' width='600' height='600'></canvas>
     <canvas id='chilbert' width='600' height='600' tabindex='1'></canvas>
