@@ -6,15 +6,15 @@ class Buttons {
     this.ctx = this.canvas.getContext('2d');
     this.buttons = [];
     this.options = {
-      font: '20 Courier',
-      fgcolor: 'black',
-      bgcolor: 'white',
-      hovercolor: 'green',
-      strokecolor: 'red',
+      font: '20px Courier',
+      fgcolor: '#1b1b1b',
+      bgcolor: 'grey',
+      hovercolor: '#C0C0C0',
+      strokecolor: 'black',
       hover: false,
       shape: 'rect',
       percent: undefined,
-      percentcolor: 'yellow',
+      percentcolor: '#6ee06f',
       ...options};
   }
   add(x, y, w, h, text, callback, options) {
