@@ -1,10 +1,11 @@
 'use strict';
 
 class Koch {
-  constructor(canvas) {
+  constructor(canvas, snailImage) {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d');
     this.canvas.style.display = 'inline';
+    this.snailImage = snailImage;
 
     this.mousePressed = undefined;
     this.mousePos = undefined;
@@ -38,13 +39,7 @@ class Koch {
     this.hoverRemaining = this.loopTime * 1000 / 6;
     this.storedMoveTime = 0;
 
-    this.buttons = new Buttons(this.canvas, {
-      font: '20px Courier',
-      fgcolor: 'red',
-      bgcolor: 'grey',
-      strokecolor: 'black',
-
-    });
+    this.buttons = new Buttons(this.canvas, {});
 
     const hoverButtonOptions = {
       shape: 'circle',
@@ -55,9 +50,9 @@ class Koch {
 
     this.hoverButtons = [];
 
-    this.hoverButtons.push(this.buttons.add(canvas.width * 0.1, canvas.height * 0.27, 50, 50, '1', () => {this.hoverButton(0);}, hoverButtonOptions));
-    this.hoverButtons.push(this.buttons.add(canvas.width * 0.9, canvas.height * 0.27, 50, 50, '2', () => {this.hoverButton(1);}, hoverButtonOptions));
-    this.hoverButtons.push(this.buttons.add(canvas.width * 0.5, canvas.height * 0.9,  50, 50, '3', () => {this.hoverButton(2);}, hoverButtonOptions));
+    this.hoverButtons.push(this.buttons.add(canvas.width * 0.1, canvas.height * 0.27, 60, 50, '', () => {this.hoverButton(0);}, hoverButtonOptions));
+    this.hoverButtons.push(this.buttons.add(canvas.width * 0.9, canvas.height * 0.27, 60, 50, '', () => {this.hoverButton(1);}, hoverButtonOptions));
+    this.hoverButtons.push(this.buttons.add(canvas.width * 0.5, canvas.height * 0.9,  60, 50, '', () => {this.hoverButton(2);}, hoverButtonOptions));
 
     this.upgrades = {
       level: {
@@ -147,6 +142,7 @@ class Koch {
     const lineSize = this.canvas.width * 0.8 / linesWide;
     const shapeCenterX = lineSize * Math.pow(3, this.level) * 0.5;
     const shapeCenterY = shapeCenterX * Math.tan(Math.PI/6);
+    const snailSize = this.snailImage.width;
     ctx.translate(this.canvas.width * 0.5 - shapeCenterX,
       this.canvas.height * 0.5 - shapeCenterY);
 
@@ -170,11 +166,14 @@ class Koch {
     let angle = 0;
     const deltaAngle = Math.PI / 3;
 
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 4;
+
     while (drawnEdges <= drawEdges) {
       const c = this.cmds[i];
       switch (c) {
         case 'L':
-          ctx.strokeStyle = 'yellow';
+          ctx.strokeStyle = '#1b1b1b';
           ctx.beginPath();
           ctx.moveTo(x, y);
           let curLineSize;
@@ -191,8 +190,11 @@ class Koch {
           ctx.stroke();
           drawnEdges++;
           if (drawSnail) {
-            ctx.fillStyle = 'blue';
-            ctx.fillRect(x-5, y-5, 10, 10);
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            this.ctx.drawImage(this.snailImage, -snailSize*0.5, -snailSize*0.5);
+            ctx.restore();
           }
           break;
         case '-':

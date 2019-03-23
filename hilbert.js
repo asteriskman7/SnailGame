@@ -1,10 +1,11 @@
 'use strict';
 
 class Hilbert {
-  constructor(canvas) {
+  constructor(canvas, snailImage) {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d');
     this.canvas.style.display = 'inline';
+    this.snailImage = snailImage;
     this.state = {};
     this.state.enabled = false;
     this.state.coins = 0;
@@ -39,12 +40,7 @@ class Hilbert {
     this.canvas.ontouchstart = (e) => this.ontouchstart.call(this, e);
     this.canvas.ontouchend = (e) => this.ontouchend.call(this, e);
 
-    this.buttons = new Buttons(this.canvas, {
-      font: '20px Courier',
-      fgcolor: 'red',
-      bgcolor: 'grey',
-      strokecolor: 'black'
-    });
+    this.buttons = new Buttons(this.canvas, { });
 
     this.upgrades = {
       level: {
@@ -135,6 +131,7 @@ class Hilbert {
     const lineSize = this.canvas.width * 0.8 / linesWide;
     const shapeCenterX = lineSize * linesWide * 0.5;
     const shapeCenterY = shapeCenterX;
+    const snailSize = this.snailImage.width;
     ctx.translate(this.canvas.width * 0.5 - shapeCenterX ,
       this.canvas.height * 0.5 - shapeCenterY);
 
@@ -157,12 +154,14 @@ class Hilbert {
     let y = 0;
     let angle = 0;
     const deltaAngle = Math.PI / 2;
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 4;
 
     while (drawnEdges <= drawEdges) {
       const c = this.cmds[i];
       switch (c) {
         case 'F':
-          ctx.strokeStyle = 'purple';
+          ctx.strokeStyle = '#21a360';
           ctx.beginPath();
           ctx.moveTo(x, y);
           let curLineSize;
@@ -179,8 +178,13 @@ class Hilbert {
           ctx.stroke();
           drawnEdges++;
           if (drawSnail) {
-            ctx.fillStyle = 'orange';
-            ctx.fillRect(x-5,y-5, 10, 10);
+            ctx.save();
+            //ctx.fillStyle = 'orange';
+            //ctx.fillRect(x-5,y-5, 10, 10);
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            this.ctx.drawImage(this.snailImage, -snailSize*0.5, -snailSize*0.5);
+            ctx.restore();
           }
           break;
         case '-':

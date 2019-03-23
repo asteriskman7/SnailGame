@@ -1,10 +1,11 @@
 'use strict';
 
 class Fourier {
-  constructor(canvas) {
+  constructor(canvas, snailImage) {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d');
     this.canvas.style.display = 'inline';
+    this.snailImage = snailImage;
     this.state = {};
     this.state.enabled = false;
     this.state.coins = 0;
@@ -39,12 +40,7 @@ class Fourier {
     this.canvas.ontouchend = (e) => this.ontouchend.call(this, e);
     this.canvas.ontouchmove = (e) => this.ontouchmove.call(this, e);
 
-    this.buttons = new Buttons(this.canvas, {
-      font: '20px Courier',
-      fgcolor: 'red',
-      bgcolor: 'grey',
-      strokecolor: 'black'
-    });
+    this.buttons = new Buttons(this.canvas, { });
 
     this.upgrades = {
       level: {
@@ -125,15 +121,19 @@ class Fourier {
 
       //let cx = this.canvas.width * 0.5;
       //let cy = this.canvas.height * 0.5;
+      const snailSize = this.snailImage.width;
       let cx = 0;
       let cy = 0;
 
-      ctx.fillStyle = 'green';
-      ctx.strokeStyle = 'RGBA(255,255,255,0.3)';
+      ctx.fillStyle = '#4c994a';
+      ctx.strokeStyle = '#706ee085';
+
+      let lastAngle;
 
       this.units.forEach( (unit, i) => {
         //if (i === 0) {return;}
         const angle = unit.freq * this.angle;
+        lastAngle = angle;
         const dx = unit.mag * Math.cos(angle + unit.phase);
         const dy = unit.mag * Math.sin(angle + unit.phase);
         if (unit.mag > this.drawLimit) {
@@ -150,6 +150,12 @@ class Fourier {
         }
       });
 
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(lastAngle)
+      ctx.drawImage(this.snailImage, -snailSize * 0.5, -snailSize * 0.5);
+      ctx.restore();
+
       if (this.points.length >= this.units.length) {
         this.points = [];
         this.parent.feed(1);
@@ -157,7 +163,8 @@ class Fourier {
       }
       this.points.push({x: cx, y: cy});
 
-      ctx.strokeStyle = 'grey';
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = '#454385';
       ctx.beginPath();
       const points = this.points;
       ctx.moveTo(points[0].x, points[0].y);
