@@ -11,6 +11,7 @@ const app = {
 
     document.getElementById('buttonPrestige').onclick = app.prestigeClick;
     document.getElementById('buttonCancel').onclick = app.prestigeCancel;
+    document.getElementById('buttonReset').onclick = app.reset;
 
 
 
@@ -20,9 +21,15 @@ const app = {
       document.getElementById('imgWalkingSnail'),
       document.getElementById('imgCoin')
     );
-    app.levels.koch = new Koch(document.getElementById('ckoch'));
-    app.levels.hilbert = new Hilbert(document.getElementById('chilbert'));
-    app.levels.fourier = new Fourier(document.getElementById('cfourier'));
+    app.levels.koch = new Koch(document.getElementById('ckoch'),
+      document.getElementById('imgSnailKoch')
+    );
+    app.levels.hilbert = new Hilbert(document.getElementById('chilbert'),
+      document.getElementById('imgSnailHilbert')
+    );
+    app.levels.fourier = new Fourier(document.getElementById('cfourier'),
+      document.getElementById('imgSnailFourier')
+    );
 
     app.levels.walk.setRelations(null, app.levels.koch);
     app.levels.koch.setRelations(app.levels.walk, app.levels.hilbert);
@@ -34,8 +41,10 @@ const app = {
     setInterval(app.save, 30000);
   },
   reset: function() {
-    localStorage.removeItem('snailGame');
-    location.reload();
+    if (window.confirm('Are you sure you want to reset all progress and start over?')) {
+      localStorage.removeItem('snailGame');
+      location.reload();
+    }
   },
   load: function() {
     const loadedState = JSON.parse(localStorage.getItem('snailGame'));

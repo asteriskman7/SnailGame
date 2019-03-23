@@ -1,5 +1,5 @@
 body {
-  background: grey;
+  background: #1b1b1b;
   -webkit-user-select: none;
   -moz-user-select: none;
   -khtml-user-select: none;
@@ -8,13 +8,17 @@ body {
 }
 
 canvas {
-  background: black;
+  background: #dedede;
   display: none;
   margin: 1em;
 }
 
 .imgHidden {
   display: none;
+}
+
+#ckoch {
+  background: #dedede;
 }
 
 #divPrestige {
@@ -65,4 +69,29 @@ canvas {
 
 .pDialogButton {
   font-size: 2em;
+}
+
+#buttonHover {
+  border: none;
+  font-size: 2em;
+}
+
+#divInfoHover {
+}
+
+#buttonReset {
+  font-size: 1em;
+  margin-left: 2em;
+}
+
+#divInfo {
+  border: 2px solid #d2d2d2;
+  background: #3998af;
+  padding: 0.4em;
+  display: none;
+  font-size: 2em;
+}
+
+#divInfoHover:hover #divInfo {
+  display: inline-block;
 }

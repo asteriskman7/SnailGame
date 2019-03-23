@@ -1,14 +1,23 @@
 <html>
   <head>
     <link rel='stylesheet' href='index.css'>
-    <!--<link rel="icon" type="image/png" href="./favicon.png">-->
+    <link rel="icon" type="image/png" href="./favicon.png">
     <title>Snail Game</title>
   </head>
   <body>
     <img id='imgWalkingSnail' class='imgHidden' src='./walkingSnail.png'>
     <img id='imgGrass' class='imgHidden' src='./grass.jpg'>
     <img id='imgCoin' class='imgHidden' src='./coin.png'>
-    <button type='button' onclick='app.reset()'>reset</button>
+    <img id='imgSnailKoch' class='imgHidden' src='./snail_koch.png'>
+    <img id='imgSnailHilbert' class='imgHidden' src='./snail_hilbert.png'>
+    <img id='imgSnailFourier' class='imgHidden' src='./snail_fourier.png'>
+    <div id='divInfoHover'>
+      <button id='buttonHover' >+</button>
+      <div id='divInfo'>
+        <a href='https://github.com/asteriskman7/SnailClocks' target="_blank">Inspiration</a>
+        <button id='buttonReset' type='button'>Reset</button>
+      </div>
+    </div>
     <div id='divPrestige'>
       <div id='divPTitle'>Prestige Now!</div>
       <hr>
