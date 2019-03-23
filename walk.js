@@ -48,12 +48,7 @@ class Walk {
 
     this.storedMoveTime = 2000;
 
-    this.buttons = new Buttons(this.canvas, {
-      font: '20px Courier',
-      fgcolor: 'red',
-      bgcolor: 'grey',
-      strokecolor: 'black'
-    });
+    this.buttons = new Buttons(this.canvas, {});
 
     this.upgrades = {
       snailSpeed: {
