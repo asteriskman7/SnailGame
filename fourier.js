@@ -207,6 +207,7 @@ class Fourier {
       const cost = this.getUpgradeCost(upgradeType);
       const percent = Math.min(1, this.state.coins / cost);
       this.upgrades[upgradeType].button.options.percent = percent;
+      this.upgrades[upgradeType].button.options.visible = cost !== Infinity;
     }
 
   }
@@ -281,7 +282,13 @@ class Fourier {
     const nextUpgradeLevel = this.state.upgrades[type];
     const upgradeCost = this.upgrades[type].cost[nextUpgradeLevel];
 
-    if (upgradeCost === undefined) {return Infinity;}
+    if (upgradeCost === undefined) {
+      if (type !== 'child') {
+        return Infinity;
+      } else {
+        return 0;
+      }
+    }
     return upgradeCost;
   }
   buyUpgrade(type) {
@@ -290,16 +297,11 @@ class Fourier {
     if (this.state.coins >= upgradeCost) {
       this.state.coins -= upgradeCost;
       this.state.upgrades[type]++;
-      if (type === 'child') {
-        this.child.enable();
-      } else {
-        const newVal = this.upgrades[type].value[nextUpgradeLevel];
-        this.state[type] = newVal;
-        if (type === 'level') {
-          this.setLevel(newVal);
-        }
+      const newVal = this.upgrades[type].value[nextUpgradeLevel];
+      this.state[type] = newVal;
+      if (type === 'level') {
+        this.setLevel(newVal);
       }
-
     }
   }
 }
