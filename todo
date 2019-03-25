@@ -1,11 +1,6 @@
-add asteriskCoin request at beginning
-allow lower levels to send coins to higher levels
+tune upgrades
+fix walk rate upgrades, they get worse per upgrade?
 should coin value modify feed value?
 if stored move time becomes too large should it convert into increased coin value?
-when no more upgrades remain, hide button
-tune upgrades
 make prestige dialog more beautiful
-fix walk rate upgrades, they get worse per upgrade?
-add reset somewhere
-add link to snail clocks
-prestige button should always be in the "available" state
+increase size of walk coins and make them smaller in the distance
