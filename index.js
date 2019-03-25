@@ -11,9 +11,7 @@ const app = {
 
     document.getElementById('buttonPrestige').onclick = app.prestigeClick;
     document.getElementById('buttonCancel').onclick = app.prestigeCancel;
-    document.getElementById('buttonReset').onclick = app.reset;
-
-
+    document.getElementById('buttonReset').onclick = () => app.reset(false);
 
     app.levelList = ['walk', 'koch', 'hilbert', 'fourier'];
     app.levels = {};
@@ -37,12 +35,22 @@ const app = {
     app.levels.fourier.setRelations(app.levels.hilbert, null);
 
     app.load();
+    app.prestigeBonus = Math.pow(2, app.state.prestigeCount);
+    if (app.state.prestigeCount > 0) {
+      document.getElementById('spanPrestigeBonus').innerHTML = `${app.prestigeBonus}x`;
+      document.getElementById('divPrestigeBonusWrapper').style.display = 'block';
+    }
     app.tick();
     setInterval(app.save, 30000);
   },
-  reset: function() {
-    if (window.confirm('Are you sure you want to reset all progress and start over?')) {
+  reset: function(soft) {
+    const msg = soft ? 'Are you sure want to prestige for a 2x bonus?' : 'Are you sure you want to reset ALL progress and start over?';
+    if (window.confirm(msg)) {
+      const savedPrestigeCount = app.state.prestigeCount;
       localStorage.removeItem('snailGame');
+      if (soft) {
+        localStorage.setItem('snailGame', JSON.stringify({prestigeCount: savedPrestigeCount}));
+      }
       location.reload();
     }
   },
@@ -100,7 +108,8 @@ const app = {
     document.getElementById('divPrestige').style.display = 'none';
   },
   prestige: function() {
-
+    app.state.prestigeCount++;
+    app.reset(true);
   }
 };
 

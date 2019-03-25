@@ -95,3 +95,14 @@ canvas {
 #divInfoHover:hover #divInfo {
   display: inline-block;
 }
+
+#divPrestigeBonusWrapper {
+  display: none;
+  font-size: 2em;
+  color: #3998af;
+  margin: 0.5em;
+}
+
+#spanPrestigeBonus {
+
+}

@@ -1,5 +1,6 @@
 tune upgrades
 fix walk rate upgrades, they get worse per upgrade?
+make prestige work
 should coin value modify feed value?
 if stored move time becomes too large should it convert into increased coin value?
 make prestige dialog more beautiful
