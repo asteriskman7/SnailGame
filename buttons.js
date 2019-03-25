@@ -15,6 +15,7 @@ class Buttons {
       shape: 'rect',
       percent: undefined,
       percentcolor: '#6ee06f',
+      visible: true,
       ...options};
   }
   add(x, y, w, h, text, callback, options) {
@@ -40,7 +41,7 @@ class Buttons {
     let clicked = false;
     this.buttons.forEach( v => {
       const hover = v.options && v.options.hover;
-      if (!hover && this._isPointInShape(c, v.shape)) {
+      if (!hover && this._isPointInShape(c, v.shape) && v.options.visible) {
         v.callback();
         clicked = true;
       }
@@ -54,7 +55,7 @@ class Buttons {
       const hover = v.options && v.options.hover;
       v.hovering = this._isPointInShape(c, v.shape);
 
-      if (hover && v.hovering) {
+      if (hover && v.hovering && v.options.visible) {
         v.callback();
         hovered = true;
       }
@@ -99,6 +100,7 @@ class Buttons {
     const c = this._getCursorPosition(event);
     this.buttons.forEach( v => {
       const options = v.options; //{...this.options, ...v.options};
+      if (!options.visible) {return;}
 
       ctx.fillStyle = v.hovering ? options.hovercolor : options.bgcolor;
       ctx.font = options.font;
