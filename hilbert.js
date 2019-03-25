@@ -138,7 +138,7 @@ class Hilbert {
     const f = (this.t % this.loopTime) / this.loopTime;
     const drawEdges = this.edgeCount * f;
     if (Math.floor(drawEdges) !== this.lastDrawEdges) {
-      this.state.coins += this.state.coinValue;
+      this.state.coins += this.state.coinValue * app.prestigeBonus;
       this.parent.feed(1);
     }
     this.lastDrawEdges = Math.floor(drawEdges);
@@ -208,7 +208,7 @@ class Hilbert {
     if (this.storedMoveTime > 0) {
       const stepTime = Math.min(deltaTime, this.storedMoveTime);
       this.t += this.state.snailSpeed * stepTime / 1000;
-      this.storedMoveTime -= stepTime;
+      this.storedMoveTime = Math.max(0, this.storedMoveTime - stepTime);
     }
 
     if (this.mousePressed !== undefined) {

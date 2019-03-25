@@ -150,7 +150,7 @@ class Koch {
     const drawEdges = this.edgeCount * f;
     if (Math.floor(drawEdges) !== this.lastDrawEdges) {
       this.parent.feed(1);
-      this.state.coins += this.state.coinValue;
+      this.state.coins += this.state.coinValue * app.prestigeBonus;
     }
     this.lastDrawEdges = Math.floor(drawEdges);
 
@@ -220,7 +220,7 @@ class Koch {
     if (this.storedMoveTime > 0) {
       const stepTime = Math.min(deltaTime, this.storedMoveTime);
       this.t += this.state.snailSpeed * stepTime / 1000;
-      this.storedMoveTime -= stepTime;
+      this.storedMoveTime = Math.max(0, this.storedMoveTime - stepTime);
     }
     if (this.hovering !== undefined) {
       if (this.hovering === this.hoverTarget) {

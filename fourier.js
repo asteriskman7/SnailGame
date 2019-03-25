@@ -152,14 +152,14 @@ class Fourier {
 
       ctx.save();
       ctx.translate(cx, cy);
-      ctx.rotate(lastAngle)
+      ctx.rotate(lastAngle);
       ctx.drawImage(this.snailImage, -snailSize * 0.5, -snailSize * 0.5);
       ctx.restore();
 
       if (this.points.length >= this.units.length) {
         this.points = [];
         this.parent.feed(1);
-        this.state.coins += this.state.coinValue;
+        this.state.coins += this.state.coinValue * app.prestigeBonus;
       }
       this.points.push({x: cx, y: cy});
 
@@ -193,7 +193,7 @@ class Fourier {
     if (this.storedMoveTime > deltaTime) {
       const stepTime = Math.min(deltaTime, this.storedMoveTime);
       this.angle += Math.PI * 2 / this.units.length;
-      this.storedMoveTime -= stepTime;
+      this.storedMoveTime = Math.max(0, this.storedMovetime - stepTime);
       this.drawEnable = true;
     } else {
       this.drawEnable = false;

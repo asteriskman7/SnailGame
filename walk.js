@@ -97,7 +97,6 @@ class Walk {
     for (let key in loadedState) {
       this.state[key] = loadedState[key];
     }
-    this.state.coins = 10;
   }
   onmousedown(e) {
     this.mousePressed = e;
@@ -290,7 +289,7 @@ class Walk {
     this.coins = this.coins.filter( v => {
       const relx = this.canvas.width - (this.xpos*speedMap[v.z] - v.x);
       if (relx <= 195) {
-        this.state.coins += v.val;
+        this.state.coins += v.val * app.prestigeBonus;
         return false;
       }
       return true;
@@ -354,7 +353,7 @@ class Walk {
           }
         }
         this.xpos += dx;
-        this.storedMoveTime -= deltaTime;
+        this.storedMoveTime = Math.max(0, this.storedMoveTime - deltaTime);
       }
     }
 
