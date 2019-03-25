@@ -9,12 +9,13 @@ class Buttons {
       font: '20px Courier',
       fgcolor: '#1b1b1b',
       bgcolor: 'grey',
-      hovercolor: '#C0C0C0',
+      hovercolor: '#606060',
       strokecolor: 'black',
       hover: false,
       shape: 'rect',
       percent: undefined,
-      percentcolor: '#6ee06f',
+      percentcolor: '#C0C0C0',
+      readycolor: '#6ee06f',
       visible: true,
       ...options};
   }
@@ -113,8 +114,9 @@ class Buttons {
           ctx.fillRect(v.shape.x1, v.shape.y1, v.shape.w, v.shape.h);
           textx = v.shape.x1 + v.shape.w * 0.5;
           texty = v.shape.y1 + v.shape.h * 0.5;
-          ctx.fillStyle = options.percentcolor;
+
           if (options.percent) {
+            ctx.fillStyle = options.percent >= 1.0 ? options.readycolor : options.percentcolor;
             ctx.fillRect(v.shape.x1, v.shape.y1, v.shape.w * options.percent, v.shape.h);
           }
           break;
