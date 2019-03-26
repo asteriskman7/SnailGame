@@ -45,6 +45,7 @@ class Walk {
     this.xpos = 0;
     this.coins = [];
     this.coinTime = 0;
+    this.zxoffset = [0, 0, 0];
 
     this.storedMoveTime = 2000;
 
@@ -53,12 +54,12 @@ class Walk {
     this.upgrades = {
       snailSpeed: {
         value: [1.0,1.5], //max shouldn't be higher than 10
-        cost:  [10,50],
+        cost:  [5,50],
         button: this.buttons.add(0, 0, 100, 30, 'Speed', () => {this.buyUpgrade('snailSpeed');})
       },
       showHills: {
         value: [true],
-        cost: [100],
+        cost: [250],
         button: this.buttons.add(300, 0, 100, 30, 'Hills', () => {this.buyUpgrade('showHills');})
       },
       showMountains: {
@@ -67,7 +68,7 @@ class Walk {
         button: this.buttons.add(400, 0, 100, 30, 'Mtns', () => {this.buyUpgrade('showMountains');})
       },
       coinRate: {
-        value: [2,4,8],
+        value: [0.5,0.2,0.08],
         cost: [15,100,200],
         button: this.buttons.add(100, 0, 100, 30, 'Rate', () => {this.buyUpgrade('coinRate');})
       },
@@ -78,7 +79,7 @@ class Walk {
       },
       child: {
         value: [true],
-        cost: [5],
+        cost: [30],
         button: this.buttons.add(this.canvas.width - 100, 0, 100, 30, 'Koch', () => {this.buyUpgrade('child');})
       }
     };
@@ -163,25 +164,11 @@ class Walk {
   drawHills() {
     if (!this.state.showHills) {return;}
     const ctx = this.ctx;
-    let noiseConfig = [
-      {a: 128, s: 1/8},
-      {a: 64,  s: 1/4},
-      {a: 16,  s: 1/2},
-      {a: 8,  s: 1},
-      {a: 0,   s: 2},
-      {a: 0,   s: 4},
-    ];
-
-    const rate = 0.3;
-    const seed = 0;
-    const xscale = 10;
-    const yscale = 0.3;
-
     ctx.beginPath();
     let firstHeight = this.getHillHeight(this.xpos, 0); //yscale * fnoise((this.xpos*rate + 0)/xscale, noiseConfig) + 120;
     ctx.moveTo(0, firstHeight);
     let lastHeight;
-    for (let i = 1; i < this.canvas.width; i++) {
+    for (let i = 1; i < this.canvas.width; i+=3) {
       let height = this.getHillHeight(this.xpos, i); //yscale * fnoise((this.xpos*rate + i)/xscale, noiseConfig) + 120;
       lastHeight = height;
       ctx.lineTo(i, height);
@@ -216,25 +203,11 @@ class Walk {
     if (!this.state.showMountains) {return;}
     const ctx = this.ctx;
 
-    let noiseConfig = [
-      {a: 128, s: 1/8},
-      {a: 64,  s: 1/4},
-      {a: 16,  s: 1/2},
-      {a: 0,  s: 1},
-      {a: 0,   s: 2},
-      {a: 0,   s: 4},
-    ];
-
-    const rate = 0.1;
-    const seed = 8755;
-    const xscale = 10;
-    const yscale = 0.4;
-
     ctx.beginPath();
     let firstHeight = this.getMountainHeight(this.xpos, 0);
     ctx.moveTo(0, firstHeight);
     let lastHeight;
-    for (let i = 1; i < this.canvas.width; i++) {
+    for (let i = 1; i < this.canvas.width; i+=3) {
       let height = this.getMountainHeight(this.xpos, i);
       lastHeight = height;
       ctx.lineTo(i, height);
@@ -262,7 +235,8 @@ class Walk {
       //grass coins are value * 1
       //hill coins are  value * 10
       //mount coins are value * 100
-      this.coins.push({x: this.xpos, z: z, val: count * this.state.coinValue * Math.pow(10, z)});
+
+      this.coins.push({x: this.xpos - this.zxoffset[z] , z: z, val: count * this.state.coinValue * Math.pow(10, z)});
     //}
   }
   drawCoins(z) {
@@ -391,12 +365,19 @@ class Walk {
           this.state.coins -= upgradeCost;
           this.state.upgrades[type]++;
           this.child.enable();
+          this.mousePressed = undefined;
         }
       } else {
         this.state.coins -= upgradeCost;
         this.state.upgrades[type]++;
         const newVal = this.upgrades[type].value[nextUpgradeLevel];
         this.state[type] = newVal;
+        if (type === 'showHills') {
+          this.zxoffset[1] = this.xpos - this.xpos * 0.3;
+        }
+        if (type === 'showMountains') {
+          this.zxoffset[2] = this.xpos - this.xpos * 0.1;
+        }
       }
     }
   }
