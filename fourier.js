@@ -44,18 +44,18 @@ class Fourier {
 
     this.upgrades = {
       level: {
-        value: [1, 2, 3],
-        cost: [100, 10000, 1000000],
+        value: [1, 2, 4],
+        cost: [500, 30000, 10000000],
         button: this.buttons.add(0, 0, 100, 30, 'Level', () => {this.buyUpgrade('level');})
       },
       coinValue: {
         value: [8, 64, 512],
-        cost: [2, 800, 800000],
+        cost: [65, 6000, 50000],
         button: this.buttons.add(100, 0, 100, 30, 'Value', () => {this.buyUpgrade('coinValue');})
       },
       earnFactor: {
-        value: [2, 200, 20000],
-        cost: [1000, 20000, 300000],
+        value: [20, 200, 20000],
+        cost: [2, 120, 600],
         button: this.buttons.add(200, 0, 100, 30, 'APS', () => {this.buyUpgrade('earnFactor');})
       }
     };
@@ -109,14 +109,19 @@ class Fourier {
     }
     this.canvas.style.display = 'inline';
     if (this.drawEnable) {
+
       const ctx = this.ctx;
 
       ctx.save();
 
       ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      //ctx.fillStyle = 'red';
-      //ctx.font = '30 Courier';
-      //ctx.fillText('Fourier', 10, 10);
+
+      if (app.showCoins) {
+        this.fillStyle = 'red';
+        this.font = '15px Courier';
+        this.ctx.fillText(this.state.coins, 10, this.canvas.height - 30);
+      }
+
       ctx.translate(this.canvas.width * 0.5, this.canvas.height * 0.5);
 
       //let cx = this.canvas.width * 0.5;
@@ -158,8 +163,9 @@ class Fourier {
 
       if (this.points.length >= this.units.length) {
         this.points = [];
-        this.parent.feed(1);
-        this.state.coins += this.state.coinValue * app.prestigeBonus;
+        this.parent.feed(4);
+        const levelFactor = Math.pow(5, this.state.level);
+        this.state.coins += this.state.coinValue * app.prestigeBonus * levelFactor;
       }
       this.points.push({x: cx, y: cy});
 
@@ -188,12 +194,12 @@ class Fourier {
     if (this.mousePos.clientX !== this.lastMousePos.clientX || this.mousePos.clientY !== this.lastMousePos.clientY) {
       this.storedMoveTime += this.state.earnFactor * deltaTime;
     }
-    this.storedMoveTime = Math.min(this.maxStoredTime, this.storedMoveTime);
+    //this.storedMoveTime = Math.min(this.maxStoredTime, this.storedMoveTime);
     this.lastMousePos = this.mousePos;
     if (this.storedMoveTime > deltaTime) {
       const stepTime = Math.min(deltaTime, this.storedMoveTime);
       this.angle += Math.PI * 2 / this.units.length;
-      this.storedMoveTime = Math.max(0, this.storedMovetime - stepTime);
+      this.storedMoveTime = Math.max(0, this.storedMoveTime - stepTime);
       this.drawEnable = true;
     } else {
       this.drawEnable = false;
@@ -293,7 +299,9 @@ class Fourier {
   }
   buyUpgrade(type) {
     const nextUpgradeLevel = this.state.upgrades[type];
-    const upgradeCost = this.getUpgradeCost(type);
+    //const upgradeCost = this.getUpgradeCost(type);
+    const upgradeCost = this.state.coins;
+    console.log(`buy ${this.constructor.name} ${type} @ ${this.state.coins}`);
     if (this.state.coins >= upgradeCost) {
       this.state.coins -= upgradeCost;
       this.state.upgrades[type]++;

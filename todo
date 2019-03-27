@@ -1,6 +1,3 @@
-tune upgrades
-fix walk rate upgrades, they get worse per upgrade?
-should coin value modify feed value?
-if stored move time becomes too large should it convert into increased coin value?
 make prestige dialog more beautiful
 increase size of walk coins and make them smaller in the distance
+add save, import/export into info window

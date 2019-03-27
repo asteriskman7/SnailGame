@@ -57,27 +57,27 @@ class Koch {
     this.upgrades = {
       level: {
         value: [1, 2, 3],
-        cost: [30, 600, 9000],
+        cost: [350, 25000, 1000000],
         button: this.buttons.add(0, 0, 100, 30, 'Level', () => {this.buyUpgrade('level');})
       },
       snailSpeed: {
         value: [3, 9, 27],
-        cost: [150, 3000, 45000],
+        cost: [200000, 800000, 2000000],
         button: this.buttons.add(100, 0, 100, 30, 'Speed', () => {this.buyUpgrade('snailSpeed');})
       },
       hoverRatio: {
-        value: [10, 100, 1000],
-        cost: [10, 1000, 1000000],
+        value: [4, 10],
+        cost: [12, 4000],
         button: this.buttons.add(200, 0, 100, 30, 'Hover', () => {this.buyUpgrade('hoverRatio');})
       },
       coinValue: {
-        value: [5, 25, 125],
-        cost: [5, 500, 500000],
+        value: [9, 25, 250],
+        cost: [30, 1500, 10000000],
         button: this.buttons.add(300, 0, 100, 30, 'Value', () => {this.buyUpgrade('coinValue');})
       },
       child: {
         value: [true],
-        cost: [10],
+        cost: [5000],
         button: this.buttons.add(this.canvas.width - 100, 0, 100, 30, 'Hilbert', () => {this.buyUpgrade('child');})
       }
     };
@@ -132,6 +132,12 @@ class Koch {
     ctx.save();
 
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    if (app.showCoins) {
+      this.fillStyle = 'red';
+      this.font = '15px Courier';
+      this.ctx.fillText(this.state.coins, 10, this.canvas.height - 30);
+    }
 
     /*
     0: 0.5, 0.5 * tan(PI/6)  w = 1
@@ -305,6 +311,8 @@ class Koch {
   buyUpgrade(type) {
     const nextUpgradeLevel = this.state.upgrades[type];
     const upgradeCost = this.getUpgradeCost(type);
+    //const upgradeCost = this.state.coins;
+    //console.log(`buy ${this.constructor.name} ${type} @ ${this.state.coins}`);
     if (this.state.coins >= upgradeCost) {
       if (type === 'child') {
         if (upgradeCost === 0) {
@@ -314,6 +322,7 @@ class Koch {
           this.state.coins -= upgradeCost;
           this.state.upgrades[type]++;
           this.child.enable();
+          this.mousePressed = undefined;
         }
       } else {
         this.state.coins -= upgradeCost;

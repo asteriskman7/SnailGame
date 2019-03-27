@@ -54,7 +54,7 @@ class Walk {
     this.upgrades = {
       snailSpeed: {
         value: [1.0,1.5], //max shouldn't be higher than 10
-        cost:  [5,50],
+        cost:  [5,25000],
         button: this.buttons.add(0, 0, 100, 30, 'Speed', () => {this.buyUpgrade('snailSpeed');})
       },
       showHills: {
@@ -64,17 +64,17 @@ class Walk {
       },
       showMountains: {
         value: [true],
-        cost: [1000],
+        cost: [10000],
         button: this.buttons.add(400, 0, 100, 30, 'Mtns', () => {this.buyUpgrade('showMountains');})
       },
       coinRate: {
-        value: [0.5,0.2,0.08],
-        cost: [15,100,200],
+        value: [0.5,0.2],
+        cost: [15,75000],
         button: this.buttons.add(100, 0, 100, 30, 'Rate', () => {this.buyUpgrade('coinRate');})
       },
       coinValue: {
-        value: [3, 6],
-        cost: [2000, 3000],
+        value: [3, 6, 100],
+        cost: [3500, 130000, 450000],
         button: this.buttons.add(200, 0, 100, 30, 'Value', () => {this.buyUpgrade('coinValue');})
       },
       child: {
@@ -356,6 +356,8 @@ class Walk {
   buyUpgrade(type) {
     const nextUpgradeLevel = this.state.upgrades[type];
     const upgradeCost = this.getUpgradeCost(type);
+    //const upgradeCost = this.state.coins;
+    //console.log(`buy ${this.constructor.name} ${type} @ ${this.state.coins}`);
     if (this.state.coins >= upgradeCost) {
       if (type === 'child') {
         if (upgradeCost === 0) {

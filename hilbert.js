@@ -45,27 +45,27 @@ class Hilbert {
     this.upgrades = {
       level: {
         value: [1, 2, 3],
-        cost: [40, 800, 12000],
+        cost: [400, 250000, 2000000],
         button: this.buttons.add(0, 0, 100, 30, 'Level', () => {this.buyUpgrade('level');})
       },
       snailSpeed: {
         value: [4, 16, 64],
-        cost: [200, 8000, 320000],
+        cost: [30000, 130000, 2000000],
         button: this.buttons.add(100, 0, 100, 30, 'Speed', () => {this.buyUpgrade('snailSpeed');})
       },
       keyTime: {
-        value: [200, 1000, 5000],
-        cost: [10, 10000, 10000000],
+        value: [500, 1000, 2000],
+        cost: [15, 15000, 150000],
         button: this.buttons.add(200, 0, 100, 30, 'DPK', () => {this.buyUpgrade('keyTime');})
       },
       coinValue: {
-        value: [6, 36, 216],
-        cost: [6, 600, 600000],
+        value: [6, 36, 500],
+        cost: [30, 1750, 2500000],
         button: this.buttons.add(300, 0, 100, 30, 'Value', () => {this.buyUpgrade('coinValue');})
       },
       child: {
         value: [true],
-        cost: [5],
+        cost: [200000],
         button: this.buttons.add(this.canvas.width - 100, 0, 100, 30, 'Fourier', () => {this.buyUpgrade('child');})
       }
     };
@@ -118,6 +118,12 @@ class Hilbert {
 
     ctx.save();
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    if (app.showCoins) {
+      this.fillStyle = 'red';
+      this.font = '15px Courier';
+      this.ctx.fillText(this.state.coins, 10, this.canvas.height - 30);
+    }
 
     /*
     0: 0.5, 0.5     w = 1
@@ -259,8 +265,8 @@ class Hilbert {
     this.edgeCount = edgeCount;
     this.level = n;
   }
-  feed() {
-    this.storedMoveTime += this.loopTime * 1000;
+  feed(v) {
+    this.storedMoveTime += v * this.loopTime * 1000;
   }
   onkeypress(event) {
     const key = event.key;
@@ -284,15 +290,18 @@ class Hilbert {
   buyUpgrade(type) {
     const nextUpgradeLevel = this.state.upgrades[type];
     const upgradeCost = this.getUpgradeCost(type);
+    //const upgradeCost = this.state.coins;
+    //console.log(`buy ${this.constructor.name} ${type} @ ${this.state.coins}`);
     if (this.state.coins >= upgradeCost) {
       if (type === 'child') {
         if (upgradeCost === 0) {
-          this.child.state.coins += Math.floor(this.state.coins * 0.5);
+          this.child.state.coins += Math.floor(this.state.coins / 1000);
           this.state.coins = 0;
         } else {
           this.state.coins -= upgradeCost;
           this.state.upgrades[type]++;
           this.child.enable();
+          this.mousePressed = undefined;
         }
       } else {
         this.state.coins -= upgradeCost;

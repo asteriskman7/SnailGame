@@ -76,9 +76,12 @@ const app = {
     window.localStorage.setItem('snailGame', JSON.stringify(app.state));
   },
   update: function(timestamp, deltaTime) {
+    let coins = [];
     app.levelList.forEach( levelName => {
       app.levels[levelName].update(timestamp, deltaTime);
+      coins.push(`${levelName}: ${app.levels[levelName].state.coins}`);
     });
+    //console.log(coins.join`   `);
   },
   draw: function(timestamp, deltaTime) {
     app.levelList.forEach( levelName => {
