@@ -31,7 +31,7 @@ canvas {
   /*height: 16em;*/
   padding: 1em;
   padding-bottom: 2em;
-  background: white;
+  background: #3998af;
   border: 2px solid black;
   display: none;
 }
@@ -79,7 +79,7 @@ canvas {
 #divInfoHover {
 }
 
-#buttonReset {
+.buttonInfo {
   font-size: 1em;
   margin-left: 2em;
 }

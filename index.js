@@ -12,12 +12,14 @@ const app = {
     document.getElementById('buttonPrestige').onclick = app.prestigeClick;
     document.getElementById('buttonCancel').onclick = app.prestigeCancel;
     document.getElementById('buttonReset').onclick = () => app.reset(false);
+    document.getElementById('buttonSave').onclick = app.save;
 
     app.levelList = ['walk', 'koch', 'hilbert', 'fourier'];
     app.levels = {};
     app.levels.walk = new Walk(document.getElementById('cwalk'),
       document.getElementById('imgWalkingSnail'),
-      document.getElementById('imgCoin')
+      document.getElementById('imgCoin'),
+      document.getElementById('imgGrass')
     );
     app.levels.koch = new Koch(document.getElementById('ckoch'),
       document.getElementById('imgSnailKoch')
@@ -76,12 +78,9 @@ const app = {
     window.localStorage.setItem('snailGame', JSON.stringify(app.state));
   },
   update: function(timestamp, deltaTime) {
-    let coins = [];
     app.levelList.forEach( levelName => {
       app.levels[levelName].update(timestamp, deltaTime);
-      coins.push(`${levelName}: ${app.levels[levelName].state.coins}`);
     });
-    //console.log(coins.join`   `);
   },
   draw: function(timestamp, deltaTime) {
     app.levelList.forEach( levelName => {
@@ -100,7 +99,6 @@ const app = {
   prestigeClick: function() {
     const address = document.getElementById('inputAddress').value;
     if (address === app.levels.fourier.msg) {
-      console.log('BIG P TIME');
       app.prestige();
       document.getElementById('divPrestige').style.display = 'none';
     } else {

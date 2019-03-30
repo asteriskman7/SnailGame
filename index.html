@@ -1,5 +1,6 @@
 <html>
   <head>
+    <meta charset="UTF-8">
     <link rel='stylesheet' href='index.css'>
     <link rel="icon" type="image/png" href="./favicon.png">
     <title>Snail Game</title>
@@ -15,7 +16,8 @@
       <button id='buttonHover' >+</button>
       <div id='divInfo'>
         <a href='https://github.com/asteriskman7/SnailClocks' target="_blank">Inspiration</a>
-        <button id='buttonReset' type='button'>Reset</button>
+        <button id='buttonSave' class='buttonInfo' type='button'>Save</button>
+        <button id='buttonReset' class='buttonInfo' type='button'>Reset</button>
       </div>
     </div>
     <div id='divPrestigeBonusWrapper'>
@@ -31,7 +33,7 @@
         <span class='spanBold'>Prestige Cost:</span> 1000 asterisk_coin
       </div>
       <div id='divPWDesc'>
-        asterisk_coin Wallet Address:
+        8 character asterisk_coin wallet address:
       </div>
       <input id='inputAddress' type='password' value="********">
       <button id='buttonPrestige' class='pDialogButton' type='button'>Prestige!</button>

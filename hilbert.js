@@ -27,7 +27,7 @@ class Hilbert {
     this.loopTime = 5;
     this.lastDrawEdges = 0;
 
-    this.storedMoveTime = 0; //this.loopTime * 1000;
+    this.storedMoveTime = 0;
     this.lastKey = undefined;
     this.maxStoredTime = this.loopTime * 1000;
 
@@ -149,10 +149,6 @@ class Hilbert {
     }
     this.lastDrawEdges = Math.floor(drawEdges);
 
-    //ctx.fillStyle = 'red';
-    //ctx.font = '30 Courier';
-    //ctx.fillText('Hilbert', 10, 10);
-    //ctx.fillRect(100 * Math.cos(this.t) + 100, 100, 10, 10);
 
     let drawnEdges = 0;
     let i = 0;
@@ -185,8 +181,6 @@ class Hilbert {
           drawnEdges++;
           if (drawSnail) {
             ctx.save();
-            //ctx.fillStyle = 'orange';
-            //ctx.fillRect(x-5,y-5, 10, 10);
             ctx.translate(x, y);
             ctx.rotate(angle);
             this.ctx.drawImage(this.snailImage, -snailSize*0.5, -snailSize*0.5);
@@ -290,8 +284,6 @@ class Hilbert {
   buyUpgrade(type) {
     const nextUpgradeLevel = this.state.upgrades[type];
     const upgradeCost = this.getUpgradeCost(type);
-    //const upgradeCost = this.state.coins;
-    //console.log(`buy ${this.constructor.name} ${type} @ ${this.state.coins}`);
     if (this.state.coins >= upgradeCost) {
       if (type === 'child') {
         if (upgradeCost === 0) {

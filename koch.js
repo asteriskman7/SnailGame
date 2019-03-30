@@ -46,7 +46,8 @@ class Koch {
       strokecolor: '#00000000',
       bgcolor: '#F0808040',
       hovercolor: '#F0000040',
-      hover: true};
+      hover: true
+    };
 
     this.hoverButtons = [];
 
@@ -160,10 +161,6 @@ class Koch {
     }
     this.lastDrawEdges = Math.floor(drawEdges);
 
-
-    //ctx.fillStyle = 'red';
-    //ctx.font = '30px Courier';
-    //ctx.fillText(drawEdges, 0, 0);
 
     let drawnEdges = 0;
     let i = 0;
@@ -311,8 +308,6 @@ class Koch {
   buyUpgrade(type) {
     const nextUpgradeLevel = this.state.upgrades[type];
     const upgradeCost = this.getUpgradeCost(type);
-    //const upgradeCost = this.state.coins;
-    //console.log(`buy ${this.constructor.name} ${type} @ ${this.state.coins}`);
     if (this.state.coins >= upgradeCost) {
       if (type === 'child') {
         if (upgradeCost === 0) {

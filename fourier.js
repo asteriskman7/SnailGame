@@ -25,7 +25,7 @@ class Fourier {
     this.lastDrawEdges = 0;
     this.drawLimit = 5;
 
-    this.storedMoveTime = 0; //this.loopTime * 1000;
+    this.storedMoveTime = 0;
     this.maxStoredTime = this.loopTime * 1000;
     this.drawEnable = false;
     this.lastMousePos = {clientX: -100, clientY: -100};
@@ -124,8 +124,6 @@ class Fourier {
 
       ctx.translate(this.canvas.width * 0.5, this.canvas.height * 0.5);
 
-      //let cx = this.canvas.width * 0.5;
-      //let cy = this.canvas.height * 0.5;
       const snailSize = this.snailImage.width;
       let cx = 0;
       let cy = 0;
@@ -183,8 +181,6 @@ class Fourier {
 
     }
 
-
-
     this.buttons.draw(this.mousePos);
   }
   update(timestamp, deltaTime) {
@@ -194,7 +190,7 @@ class Fourier {
     if (this.mousePos.clientX !== this.lastMousePos.clientX || this.mousePos.clientY !== this.lastMousePos.clientY) {
       this.storedMoveTime += this.state.earnFactor * deltaTime;
     }
-    //this.storedMoveTime = Math.min(this.maxStoredTime, this.storedMoveTime);
+
     this.lastMousePos = this.mousePos;
     if (this.storedMoveTime > deltaTime) {
       const stepTime = Math.min(deltaTime, this.storedMoveTime);
@@ -299,9 +295,7 @@ class Fourier {
   }
   buyUpgrade(type) {
     const nextUpgradeLevel = this.state.upgrades[type];
-    //const upgradeCost = this.getUpgradeCost(type);
-    const upgradeCost = this.state.coins;
-    console.log(`buy ${this.constructor.name} ${type} @ ${this.state.coins}`);
+    const upgradeCost = this.state.coins;    
     if (this.state.coins >= upgradeCost) {
       this.state.coins -= upgradeCost;
       this.state.upgrades[type]++;

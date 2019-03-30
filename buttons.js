@@ -100,7 +100,7 @@ class Buttons {
     ctx.textBaseline = 'middle';
     const c = this._getCursorPosition(event);
     this.buttons.forEach( v => {
-      const options = v.options; //{...this.options, ...v.options};
+      const options = v.options;
       if (!options.visible) {return;}
 
       ctx.fillStyle = v.hovering ? options.hovercolor : options.bgcolor;
@@ -133,8 +133,6 @@ class Buttons {
 
       ctx.fillStyle = options.fgcolor;
       ctx.fillText(v.text, textx, texty);
-
-      //if (v.hovering) {     }
 
       ctx.strokeStyle = options.strokecolor;
       ctx.lineWidth = v.hovering ? 3 : 1;

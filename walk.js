@@ -1,7 +1,7 @@
 'use strict';
 
 class Walk {
-  constructor(canvas, snailImage, coinImage) {
+  constructor(canvas, snailImage, coinImage, grassImage) {
     this.canvas = canvas;
     this.ctx = this.canvas.getContext('2d');
 
@@ -16,6 +16,7 @@ class Walk {
 
     this.snailImage = snailImage;
     this.coinImage = coinImage;
+    this.grassImage = grassImage;
 
     this.canvas.style.display = 'inline';
     this.t = 0;
@@ -46,6 +47,20 @@ class Walk {
     this.coins = [];
     this.coinTime = 0;
     this.zxoffset = [0, 0, 0];
+    this.speedMap = [1, 0.3, 0.1];
+    this.yFunctions = [
+      (canvasx) => this.canvas.height * 0.8,
+      (canvasx) => this.getHillHeight(this.xpos, canvasx),
+      (canvasx) => this.getMountainHeight(this.xpos, canvasx)
+    ];
+    this.noiseConfig = [
+      {a: 128, s: 1/8},
+      {a: 64,  s: 1/4},
+      {a: 16,  s: 1/2},
+      {a: 8,  s: 1},
+      {a: 0,   s: 2},
+      {a: 0,   s: 4},
+    ];
 
     this.storedMoveTime = 2000;
 
@@ -53,7 +68,7 @@ class Walk {
 
     this.upgrades = {
       snailSpeed: {
-        value: [1.0,1.5], //max shouldn't be higher than 10
+        value: [1.0,1.5],
         cost:  [5,25000],
         button: this.buttons.add(0, 0, 100, 30, 'Speed', () => {this.buyUpgrade('snailSpeed');})
       },
@@ -95,9 +110,9 @@ class Walk {
   }
   loadFromString(str) {
     const loadedState = JSON.parse(str);
-    for (let key in loadedState) {
-      this.state[key] = loadedState[key];
-    }
+    //let anything from loadedState override current state
+    this.state = {...this.state,...loadedState};
+    this.setLevel(this.state.level);
   }
   onmousedown(e) {
     this.mousePressed = e;
@@ -117,12 +132,6 @@ class Walk {
   ontouchend(e) {
     this.mousePressed = undefined;
   }
-  getTimeString(t) {
-    let [h,m] = t.toLocaleTimeString().split` `[0].split`:`;
-    let baseString = `${h}:${m}`;
-    let displayString = baseString;
-    return displayString;
-  }
   drawSnail(position) {
     const fullW = this.snailImage.width;
     //go from snailMinSize to 1.0
@@ -135,41 +144,31 @@ class Walk {
   }
   drawGrass() {
     const ctx = this.ctx;
-    const img = document.getElementById('imgGrass');
 
     const imgy = this.canvas.height * 0.8 - 10;
-    const imgx = (-this.xpos) % img.width;
+    const imgx = (-this.xpos) % this.grassImage.width;
 
-    ctx.drawImage(img, imgx, imgy);
-    ctx.drawImage(img, imgx + this.canvas.width, imgy);
+    ctx.drawImage(this.grassImage, imgx, imgy);
+    ctx.drawImage(this.grassImage, imgx + this.canvas.width, imgy);
 
   }
   getHillHeight(x, canvasx) {
-    let noiseConfig = [
-      {a: 128, s: 1/8},
-      {a: 64,  s: 1/4},
-      {a: 16,  s: 1/2},
-      {a: 8,  s: 1},
-      {a: 0,   s: 2},
-      {a: 0,   s: 4},
-    ];
-
     const rate = 0.3;
     const seed = 0;
     const xscale = 10;
     const yscale = 0.3;
 
-    return yscale * fnoise((x*rate + canvasx)/xscale, noiseConfig) + 120;
+    return yscale * fnoise((x*rate + canvasx)/xscale, this.noiseConfig) + 120;
   }
   drawHills() {
     if (!this.state.showHills) {return;}
     const ctx = this.ctx;
     ctx.beginPath();
-    let firstHeight = this.getHillHeight(this.xpos, 0); //yscale * fnoise((this.xpos*rate + 0)/xscale, noiseConfig) + 120;
+    let firstHeight = this.getHillHeight(this.xpos, 0);
     ctx.moveTo(0, firstHeight);
     let lastHeight;
     for (let i = 1; i < this.canvas.width; i+=3) {
-      let height = this.getHillHeight(this.xpos, i); //yscale * fnoise((this.xpos*rate + i)/xscale, noiseConfig) + 120;
+      let height = this.getHillHeight(this.xpos, i);
       lastHeight = height;
       ctx.lineTo(i, height);
     }
@@ -183,21 +182,12 @@ class Walk {
     ctx.stroke();
   }
   getMountainHeight(x, canvasx) {
-    let noiseConfig = [
-      {a: 128, s: 1/8},
-      {a: 64,  s: 1/4},
-      {a: 16,  s: 1/2},
-      {a: 0,  s: 1},
-      {a: 0,   s: 2},
-      {a: 0,   s: 4},
-    ];
-
     const rate = 0.1;
     const seed = 8755;
     const xscale = 10;
     const yscale = 0.4;
 
-    return yscale * fnoise((x*rate + canvasx + seed)/xscale, noiseConfig) + 80;
+    return yscale * fnoise((x*rate + canvasx + seed)/xscale, this.noiseConfig) + 80;
   }
   drawMountains() {
     if (!this.state.showMountains) {return;}
@@ -227,41 +217,20 @@ class Walk {
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
   addCoins(count, z) {
-    //const coinScore = v * Math.random();
-
-    //const maxValue = this.state.snailSpeed <= 0.5 ? 0.5/60 :  (this.state.snailSpeed * (7/9) + 2/9) / 60;
-
-    //if (coinScore > maxValue * this.state.coinRate) {
-      //grass coins are value * 1
-      //hill coins are  value * 10
-      //mount coins are value * 100
-
-      this.coins.push({x: this.xpos - this.zxoffset[z] , z: z, val: count * this.state.coinValue * Math.pow(10, z)});
-    //}
+    this.coins.push({x: this.xpos - this.zxoffset[z] , z: z, val: count * this.state.coinValue * Math.pow(10, z)});
   }
-  drawCoins(z) {
-    const speed = [1, 0.3, 0.1][z];
-    const yf = [
-      (canvasx) => this.canvas.height * 0.8,
-      (canvasx) => this.getHillHeight(this.xpos, canvasx),
-      (canvasx) => this.getMountainHeight(this.xpos, canvasx)
-    ][z];
-
+  drawCoins() {
     this.coins.forEach( v => {
-      if (v.z === z) {
-        this.ctx.fillStyle = 'yellow';
-        const canvasx = this.canvas.width - (this.xpos * speed - v.x);
-        const y = yf(canvasx);
-        const x = this.canvas.width - (this.xpos * speed - v.x);
-        //this.ctx.fillText(v.val, this.canvas.width - (this.xpos * speed - v.x), y);
-        this.ctx.drawImage(this.coinImage, x, y - this.coinImage.height * 0.5);
-      }
+      const speed = this.speedMap[v.z];
+      const canvasx = this.canvas.width - (this.xpos * speed - v.x);
+      const y = this.yFunctions[v.z](canvasx);
+      const x = this.canvas.width - (this.xpos * speed - v.x);
+      this.ctx.drawImage(this.coinImage, x, y - this.coinImage.height * 0.5);
     });
   }
   getCoins() {
-    const speedMap = [1, 0.3, 0.1];
     this.coins = this.coins.filter( v => {
-      const relx = this.canvas.width - (this.xpos*speedMap[v.z] - v.x);
+      const relx = this.canvas.width - (this.xpos*this.speedMap[v.z] - v.x);
       if (relx <= 195) {
         this.state.coins += v.val * app.prestigeBonus;
         return false;
@@ -285,17 +254,13 @@ class Walk {
   draw(timestamp, deltaTime) {
     const ctx = this.ctx;
     ctx.save();
-    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-
+    //ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.drawSky();
     this.drawMountains();
-    this.drawCoins(2);
     this.drawHills();
-    this.drawCoins(1);
     this.drawGrass();
-    this.drawCoins(0);
+    this.drawCoins();
     this.drawSnail(this.t);
     this.drawCoinCount();
     this.buttons.draw(this.mousePos);
@@ -356,8 +321,6 @@ class Walk {
   buyUpgrade(type) {
     const nextUpgradeLevel = this.state.upgrades[type];
     const upgradeCost = this.getUpgradeCost(type);
-    //const upgradeCost = this.state.coins;
-    //console.log(`buy ${this.constructor.name} ${type} @ ${this.state.coins}`);
     if (this.state.coins >= upgradeCost) {
       if (type === 'child') {
         if (upgradeCost === 0) {
@@ -375,10 +338,10 @@ class Walk {
         const newVal = this.upgrades[type].value[nextUpgradeLevel];
         this.state[type] = newVal;
         if (type === 'showHills') {
-          this.zxoffset[1] = this.xpos - this.xpos * 0.3;
+          this.zxoffset[1] = this.xpos - this.xpos * this.speedMap[1];
         }
         if (type === 'showMountains') {
-          this.zxoffset[2] = this.xpos - this.xpos * 0.1;
+          this.zxoffset[2] = this.xpos - this.xpos * this.speedMap[2];
         }
       }
     }

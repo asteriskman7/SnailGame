@@ -54,30 +54,6 @@ function pathToPoints(path) {
     }
   });
 
-  /*
-  //now expand circlePoints
-  const expandedPoints = [];
-
-  for (let i = 0; i < points.length - 1; i++) {
-    const [cx, cy] = points[i];
-    const [nx, ny] = points[i+1];
-    const d = Math.sqrt((nx - cx) * (nx - cx) + (ny - cy) * (ny - cy));
-    expandedPoints.push(points[i]);
-    if (d > maxDist) {
-      const newSegmentCount = Math.ceil(d / maxDist);
-      const pointDist = d / newSegmentCount;
-      const newPointCount = newSegmentCount - 1;
-      const dx = (nx - cx) / newSegmentCount;
-      const dy = (ny - cy) / newSegmentCount;
-      for (let j = 1; j <= newPointCount; j++) {
-        expandedPoints.push([cx + dx * j, cy + dy * j]);
-      }
-    }
-  }
-  expandedPoints.push(points[points.length-1]);
-
-  return expandedPoints;
-  */
   return points;
 }
 
