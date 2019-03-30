@@ -112,7 +112,6 @@ class Walk {
     const loadedState = JSON.parse(str);
     //let anything from loadedState override current state
     this.state = {...this.state,...loadedState};
-    this.setLevel(this.state.level);
   }
   onmousedown(e) {
     this.mousePressed = e;
