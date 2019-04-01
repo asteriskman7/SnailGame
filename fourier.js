@@ -295,7 +295,7 @@ class Fourier {
   }
   buyUpgrade(type) {
     const nextUpgradeLevel = this.state.upgrades[type];
-    const upgradeCost = this.state.coins;    
+    const upgradeCost = this.getUpgradeCost(type);    
     if (this.state.coins >= upgradeCost) {
       this.state.coins -= upgradeCost;
       this.state.upgrades[type]++;
