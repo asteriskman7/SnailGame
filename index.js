@@ -98,7 +98,7 @@ const app = {
   },
   prestigeClick: function() {
     const address = document.getElementById('inputAddress').value;
-    if (address === app.levels.fourier.msg) {
+    if (address.toLowerCase() === app.levels.fourier.msg.toLowerCase()) {
       app.prestige();
       document.getElementById('divPrestige').style.display = 'none';
     } else {
